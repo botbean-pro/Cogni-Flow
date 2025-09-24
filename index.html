@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cogni-Flow - Digital Learning Companion</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- OpenDyslexic Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body data-theme="light">
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="flex items-center justify-between">
+                <div class="logo">
+                    <h1>Cogni-Flow</h1>
+                    <p>Your Digital Learning Companion</p>
+                </div>
+                <div class="header-controls flex items-center gap-16">
+                    <button class="btn btn--outline" id="settingsToggle" type="button">
+                        ⚙️ Settings
+                    </button>
+                    <button class="btn btn--outline" id="themeToggle" type="button">
+                        🌙 Theme
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel hidden" id="settingsPanel">
+        <div class="settings-content">
+            <div class="settings-header flex items-center justify-between">
+                <h2 id="settingsTitle">Accessibility Settings</h2>
+                <button class="btn btn--outline" id="closeSettings" type="button">✕</button>
+            </div>
+            
+            <div class="settings-body">
+                <!-- Font Settings -->
+                <div class="setting-group">
+                    <h3>Font Settings</h3>
+                    <div class="form-group">
+                        <label class="form-label" for="fontFamily">Font Family</label>
+                        <select class="form-control" id="fontFamily">
+                            <option value="Arial, sans-serif">Arial</option>
+                            <option value="Helvetica, sans-serif">Helvetica</option>
+                            <option value="Verdana, sans-serif">Verdana</option>
+                            <option value="'Lexend', sans-serif">Lexend (Dyslexia-friendly)</option>
+                            <option value="'OpenDyslexic', sans-serif">OpenDyslexic</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="fontSize">Font Size: <span id="fontSizeValue">16px</span></label>
+                        <input type="range" class="form-control" id="fontSize" min="14" max="26" value="16">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="letterSpacing">Letter Spacing: <span id="letterSpacingValue">0px</span></label>
+                        <input type="range" class="form-control" id="letterSpacing" min="0" max="5" value="0" step="0.5">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="lineHeight">Line Height: <span id="lineHeightValue">1.5</span></label>
+                        <input type="range" class="form-control" id="lineHeight" min="1.2" max="2.5" value="1.5" step="0.1">
+                    </div>
+                </div>
+
+                <!-- Color Settings -->
+                <div class="setting-group">
+                    <h3>Color Theme</h3>
+                    <div class="theme-options">
+                        <!--Light Mode is now kicked-->
+                        <button class="theme-btn" data-theme="dark" type="button">Dark Mode</button>
+                        <button class="theme-btn" data-theme="high-contrast" type="button">High Contrast</button>
+                        <!--Deep Blue mode is now kicked-->
+                    </div>
+                </div>
+
+                <!-- Reading Settings -->
+                <div class="setting-group">
+                    <h3>Reading Features</h3>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="bionicReading"> Enable Bionic Reading
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="readingSpeed">Reading Speed: <span id="readingSpeedValue">1x</span></label>
+                        <input type="range" class="form-control" id="readingSpeed" min="0.5" max="2" value="1" step="0.1">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Navigation Tabs -->
+            <nav class="tab-navigation">
+                <button class="tab-btn active" id="inputTab" type="button">📝 Input</button>
+                <button class="tab-btn" id="notesTab" type="button">📋 Smart Notes</button>
+                <button class="tab-btn" id="mindmapTab" type="button">🗺️ Mind Map</button>
+                <button class="tab-btn" id="quizTab" type="button">🧠 Quiz</button>
+            </nav>
+
+            <!-- Input Panel -->
+            <div class="tab-panel active" id="inputPanel">
+                <div class="input-section">
+                    <h2>Import Your Study Material</h2>
+                    <div class="input-methods">
+                        <!-- Text Input -->
+                        <div class="input-method">
+                            <h3>📝 Paste Text</h3>
+                            <textarea class="form-control" id="textInput" rows="8" placeholder="Paste your study material here..."></textarea>
+                        </div>
+
+                        <!-- URL Input -->
+                        <div class="input-method">
+                            <h3>🔗 Web Article URL</h3>
+                            <input type="url" class="form-control" id="urlInput" placeholder="https://example.com/article">
+                            <button class="btn btn--primary mt-8" id="fetchUrl" type="button">Fetch Content</button>
+                        </div>
+
+                        <!-- File Upload -->
+                        <div class="input-method">
+                            <h3>📁 Upload File</h3>
+                            <div class="file-upload-area" id="fileUploadArea">
+                                <div class="upload-icon">📄</div>
+                                <p>Drag & drop your file here or <button class="upload-btn" id="selectFile" type="button">browse files</button></p>
+                                <p class="file-types">Supports: PDF, DOCX, TXT</p>
+                                <input type="file" id="fileInput" accept=".pdf,.docx,.txt" hidden>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="process-section">
+                        <button class="btn btn--primary btn--lg" id="processContent" type="button">🚀 Process Content</button>
+                        <button class="btn btn--outline btn--lg" id="loadSample" type="button">📚 Load Sample Content</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Smart Notes Panel -->
+            <div class="tab-panel hidden" id="notesPanel">
+                <div class="content-section">
+                    <div class="section-header flex items-center justify-between">
+                        <h2>📋 Smart Notes</h2>
+                        <div class="content-controls">
+                            <button class="btn btn--outline" id="ttsNotesBtn" type="button">🔊 Read Aloud</button>
+                            <button class="btn btn--outline" id="exportNotes" type="button">💾 Export</button>
+                        </div>
+                    </div>
+                    <div class="notes-content" id="notesContent">
+                        <p class="placeholder-text">Process some content to generate smart notes...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mind Map Panel -->
+            <div class="tab-panel hidden" id="mindmapPanel">
+                <div class="content-section">
+                    <div class="section-header flex items-center justify-between">
+                        <h2>🗺️ Interactive Mind Map</h2>
+                        <div class="content-controls">
+                            <button class="btn btn--outline" id="expandAllNodes" type="button">🔍 Expand All</button>
+                            <button class="btn btn--outline" id="collapseAllNodes" type="button">📁 Collapse All</button>
+                        </div>
+                    </div>
+                    <div class="mindmap-container" id="mindmapContainer">
+                        <div class="mindmap-placeholder">
+                            <div class="placeholder-icon">🗺️</div>
+                            <p>Process content to generate an interactive mind map</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Panel -->
+            <div class="tab-panel hidden" id="quizPanel">
+                <div class="content-section">
+                    <div class="section-header flex items-center justify-between">
+                        <h2>🧠 Interactive Quiz</h2>
+                        <div class="quiz-stats">
+                            <span id="quizProgress">Question <span id="currentQ">0</span> of <span id="totalQ">0</span></span>
+                            <span id="quizScore">Score: <span id="score">0</span>/<span id="maxScore">0</span></span>
+                        </div>
+                    </div>
+                    <div class="quiz-container" id="quizContainer">
+                        <div class="quiz-placeholder">
+                            <div class="placeholder-icon">🧠</div>
+                            <p>Process content to generate interactive quizzes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Text-to-Speech Controls -->
+    <div class="tts-controls hidden" id="ttsControls">
+        <div class="tts-content">
+            <div class="tts-info">
+                <span class="tts-icon">🔊</span>
+                <span class="tts-text">Text-to-Speech Active</span>
+            </div>
+            <div class="tts-buttons">
+                <button class="btn btn--sm" id="ttsPlay" type="button">▶️</button>
+                <button class="btn btn--sm" id="ttsPause" type="button">⏸️</button>
+                <button class="btn btn--sm" id="ttsStop" type="button">⏹️</button>
+                <button class="btn btn--sm" id="ttsClose" type="button">✕</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Processing your content...</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
