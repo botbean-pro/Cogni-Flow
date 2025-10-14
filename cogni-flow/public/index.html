@@ -1,119 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Cogni-Flow - Digital Learning Companion</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&family=Lexend:wght@300;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/png" href="Cogni-Flow-Logo.png">
-</head>
-<body data-theme="scheme1">
-    <header class="header">
-        <div class="logo-section">
-            <div class="logo"><img src="Cogni-Flow-Logo.png" alt="Cogni-Flow Logo"></div>
-            <div class="title-area">
-                <h1>Cogni-Flow</h1>
-                <p class="subtitle">Your Digital Learning Companion</p>
-            </div>
-        </div>
-        <div class="right">
-            <button id="settingsBtn" title="Settings">⚙️</button>
-            <button id="themeToggle" title="Switch Color Scheme">🎨</button>
-        </div>
-    </header>
-    
-    <main>
-        <nav>
-            <button class="tab-btn active" data-tab="input">📝 Input</button>
-            <button class="tab-btn" data-tab="notes">📋 Smart Notes</button>
-            <button class="tab-btn" data-tab="mindmap">🧠 Mind Map</button>
-            <button class="tab-btn" data-tab="quiz">🧩 Quiz</button>
-            <button class="tab-btn" data-tab="flashcard">🗂️ Flashcards</button>
-        </nav>
-        
-        <section class="tab-panel active" id="input">
-            <textarea id="textInput" placeholder="Paste your text here and watch the magic happen! Upload a file or enter a link to get started..."></textarea>
-            <input type="file" id="fileInput" accept=".txt,.md">
-            <input type="url" id="urlInput" placeholder="Paste a public article link here">
-            <div class="center-btn">
-                <button id="generateBtn">Generate Learning Materials</button>
-            </div>
-            <div id="genStatus"></div>
-        </section>
-        
-        <section class="tab-panel" id="notes">
-            <div class="speech-controls">
-                <button id="playBtn" class="speech-btn primary">🔊 Read Aloud</button>
-                <button id="pauseBtn" class="speech-btn">⏸️ Pause</button>
-                <button id="rewindBtn" class="speech-btn">⏪ Rewind</button>
-                <button id="skipBtn" class="speech-btn">⏩ Skip</button>
-                <div class="speed-control">
-                    <label for="speedSlider">Speed:</label>
-                    <input type="range" id="speedSlider" min="0.5" max="2" step="0.1" value="1">
-                    <span id="speedValue">1x</span>
-                </div>
-            </div>
-            <div id="notesContent"></div>
-        </section>
-        
-        <section class="tab-panel" id="mindmap">
-            <div id="mindmapContent"></div>
-        </section>
-        
-        <section class="tab-panel" id="quiz">
-            <div id="quizContent"></div>
-        </section>
-        
-        <section class="tab-panel" id="flashcard">
-            <div id="flashcardContent"></div>
-        </section>
-    </main>
-    
-    <!-- Settings Modal -->
-    <div class="modal-bg" id="settingsModal">
-        <div class="modal">
-            <h2>Settings</h2>
-            <label>Font Size
-                <input type="range" id="fontSz" min="12" max="24" value="16">
-            </label>
-            <label>Font Family
-                <select id="fontFam">
-                    <option>Lexend, Arial, sans-serif</option>
-                    <option>OpenDyslexic, Arial, sans-serif</option>
-                    <option>Inter, Arial, sans-serif</option>
-                    <option>Arial, sans-serif</option>
-                </select>
-            </label>
-            <label>Text Align
-                <select id="txtAlign">
-                    <option>left</option>
-                    <option>center</option>
-                    <option>justify</option>
-                </select>
-            </label>
-            <label>Line Height
-                <input type="range" id="lineHeight" min="1.2" max="2.5" step="0.1" value="1.5">
-            </label>
-            <label>Letter Spacing
-                <input type="range" id="letterSpacing" min="0" max="3" step="0.1" value="0">
-            </label>
-            <label>
-                <input type="checkbox" id="bionic"> Bionic Reading
-            </label>
-            <button id="closeSet">Close Settings</button>
-        </div>
-    </div>
-
-    <div class="modal-bg" id="errorModal">
-        <div class="modal">
-            <h2 style="color: var(--accent4);">Error</h2>
-            <p id="errorContent" class="mb-4"></p>
-            <button id="closeError">Got It!</button>
-        </div>
-    </div>
-
-    <script src="script.js">
-    </script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/Cogni-Flow-Logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Your digital learning companion - Cogni-Flow" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&family=Lexend:wght@300;500;700&display=swap" rel="stylesheet" />
+    <title>Cogni-Flow – Digital Learning Companion</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
 </html>
