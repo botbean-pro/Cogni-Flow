@@ -2392,12 +2392,20 @@ select {
 .logo-bottom-left {
   bottom: 0vh;
   left: 0vw;
+<<<<<<< HEAD
   max-width: 300px;
+=======
+  max-width: 475px;
+>>>>>>> 1fd508c632beebb7278007f815e1e88861f7086d
 }
 .logo-bottom-right {
   bottom: 0vh;
   right: 0vw;
+<<<<<<< HEAD
   max-width: 455px;
+=======
+  max-width: 750px;
+>>>>>>> 1fd508c632beebb7278007f815e1e88861f7086d
 }
 .logo-center {
   top: 50%;
@@ -2519,6 +2527,7 @@ select {
     left: var(--space-20) !important;
     max-width: 80px !important;
   }
+<<<<<<< HEAD
 }
 
 /* === Updated Home Page Styles === */
@@ -2662,3 +2671,6 @@ select {
   outline: none;
   box-shadow: var(--focus-ring);
 }
+=======
+}
+>>>>>>> 1fd508c632beebb7278007f815e1e88861f7086d

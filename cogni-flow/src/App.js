@@ -120,6 +120,7 @@ export default function App() {
   };
 
   const cleanHtmlResponse = (response) => {
+<<<<<<< HEAD
   if (!response) return "";
   let cleanedResponse = response;
 
@@ -144,6 +145,18 @@ export default function App() {
   ) {
     cleanedResponse = cleanedResponse.substring(0, cleanedResponse.length - 1);
   }
+=======
+    if (!response) return "";
+    let cleanedResponse = response.replace(/```html/gi, "");
+    cleanedResponse = cleanedResponse.replace(/```/g, "");
+    cleanedResponse = cleanedResponse.replace(/^['"`]+|['"`]+$/g, "");
+    cleanedResponse = cleanedResponse.trim();
+    if (cleanedResponse.startsWith("```")) {
+      cleanedResponse = cleanedResponse.split("\n").slice(1).join("\n");
+    }
+    return cleanedResponse;
+  };
+>>>>>>> 1fd508c632beebb7278007f815e1e88861f7086d
 
   // Extract text from HTML
   const extractTextFromHtml = (htmlString) => {
@@ -225,6 +238,7 @@ export default function App() {
 
   // Generate content using Gemini API
   const generateContentFromGemini = async (prompt) => {
+<<<<<<< HEAD
   const payload = {
     contents: [{ parts: [{ text: prompt }] }],
     generationConfig: {
@@ -266,6 +280,38 @@ export default function App() {
   return "";
 };
 
+=======
+    const payload = {
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7, topK: 40, topP: 0.95, maxOutputTokens: 8192 },
+    };
+    
+    for (let i = 0; i < API_ENDPOINTS.length; i++) {
+      try {
+        const response = await fetch(API_ENDPOINTS[i], {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const jsonResponse = await response.json();
+        
+        if (!response.ok) {
+          if (i < API_ENDPOINTS.length - 1) continue;
+          throw new Error(jsonResponse.error?.message || "Unknown API error");
+        }
+        
+        const generatedText = jsonResponse?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (generatedText) return cleanHtmlResponse(generatedText);
+        
+        if (i < API_ENDPOINTS.length - 1) continue;
+        throw new Error("Invalid API response.");
+      } catch (error) {
+        if (i === API_ENDPOINTS.length - 1) throw error;
+      }
+    }
+    return "";
+  };
+>>>>>>> 1fd508c632beebb7278007f815e1e88861f7086d
 
   // Content generators
   const generateSmartNotes = async (inputText) => {
@@ -321,7 +367,11 @@ Content: ${inputText}`;
   };
 
   const generateFlashcards = async (inputText) => {
+<<<<<<< HEAD
   const prompt = `Create 8 flashcards from this content. Return ONLY clean HTML, no markdown fences, no emojis.
+=======
+    const prompt = `Create 8 flashcards from this content. Return ONLY clean HTML, no markdown fences, no emojis.
+>>>>>>> 1fd508c632beebb7278007f815e1e88861f7086d
 Use this exact structure per card:
 <div class="flashcard">
   <div class="card-inner">
@@ -332,6 +382,7 @@ Use this exact structure per card:
 Wrap all cards inside:
 <div class="flashcard-deck"> ...cards... </div>
 
+<<<<<<< HEAD
 Content:
 ${inputText}`;
 
@@ -346,6 +397,59 @@ ${inputText}`;
   }
 };
 
+=======
+Content: ${inputText}`;
+    const htmlContent = await generateContentFromGemini(prompt);
+    setFlashcardContent(htmlContent);
+  };
+
+  // Event handlers
+  const handleFileChange = (e) => setFileInput(e.target.files?.[0] || null);
+
+  const handleGenerate = async () => {
+    setIsGenerating(true);
+    setGenStatus("Preparing your content...");
+    let processedText = textInput.trim();
+
+    try {
+      if (!processedText && urlInput && !fileInput) {
+        setGenStatus("Fetching content from URL...");
+        processedText = await fetchUrlContent(urlInput);
+        setGenStatus("URL content loaded!");
+      }
+      if (!processedText && fileInput) {
+        setGenStatus("Reading file...");
+        processedText = await fileInput.text();
+      }
+      if (!processedText) {
+        throw new Error("Please provide text, a URL, or a file.");
+      }
+
+      setGenStatus("Creating Smart Notes...");
+      await generateSmartNotes(processedText);
+      await new Promise((resolve) => setTimeout(resolve, 400));
+
+      setGenStatus("Building Mind Map...");
+      await generateMindMap(processedText);
+      await new Promise((resolve) => setTimeout(resolve, 400));
+
+      setGenStatus("Crafting Quiz...");
+      await generateQuiz(processedText);
+      await new Promise((resolve) => setTimeout(resolve, 400));
+
+      setGenStatus("Designing Flashcards...");
+      await generateFlashcards(processedText);
+
+      setGenStatus("✅ All materials generated! Check the tabs above.");
+      setActiveTab("notes");
+    } catch (error) {
+      showErrorDialog("Generation failed", error);
+      setGenStatus("Error occurred.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+>>>>>>> 1fd508c632beebb7278007f815e1e88861f7086d
 
   // Speech synthesis functions
   const initializeSpeech = () => {
@@ -375,10 +479,17 @@ ${inputText}`;
           voice.name.includes("Google") ||
           voice.name.includes("Microsoft"))
     );
+<<<<<<< HEAD
     if (preferredVoices.length) return preferredVoices;
     
     const englishVoices = voices.filter((voice) => voice.lang?.startsWith("en"));
     return englishVoices || null;
+=======
+    if (preferredVoices.length) return preferredVoices[0];
+    
+    const englishVoices = voices.filter((voice) => voice.lang?.startsWith("en"));
+    return englishVoices[0] || null;
+>>>>>>> 1fd508c632beebb7278007f815e1e88861f7086d
   };
 
   const speakCurrentSentence = () => {
@@ -489,7 +600,11 @@ ${inputText}`;
     setActiveTab(tab);
   };
 
+<<<<<<< HEAD
   // NEW: Home page render with main content below
+=======
+  // NEW: Home page render
+>>>>>>> 1fd508c632beebb7278007f815e1e88861f7086d
   if (showHomePage) {
     return (
       <div className="home-page">
@@ -553,6 +668,7 @@ ${inputText}`;
             )}
           </div>
         </div>
+<<<<<<< HEAD
 
         {/* Main App Content - Scrollable below hero */}
         <div className="main-app-content" style={{ 
@@ -752,17 +868,28 @@ ${inputText}`;
             )}
           </div>
         </div>
+=======
+        <div style={{ height: '210vh' }}></div>
+>>>>>>> 1fd508c632beebb7278007f815e1e88861f7086d
       </div>
     );
   }
 
+<<<<<<< HEAD
   // Original App Content (when Enter App is clicked)
+=======
+  // Original App Content
+>>>>>>> 1fd508c632beebb7278007f815e1e88861f7086d
   return (
     <div className="App" data-theme={theme}>
       <header className="header">
         <div className="logo-section">
           <div className="logo">
+<<<<<<< HEAD
             <img src="/Cogni-Flow-4.png" alt="Cogni-Flow Logo" />
+=======
+            <img src="/Cogni-Flow-4.jpg" alt="Cogni-Flow Logo" />
+>>>>>>> 1fd508c632beebb7278007f815e1e88861f7086d
           </div>
           <div className="title-area">
             <h1>Cogni-Flow</h1>
@@ -945,4 +1072,7 @@ ${inputText}`;
     </div>
   );
 }
+<<<<<<< HEAD
 }
+=======
+>>>>>>> 1fd508c632beebb7278007f815e1e88861f7086d
