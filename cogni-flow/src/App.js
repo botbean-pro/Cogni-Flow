@@ -34,9 +34,6 @@ export default function App() {
   // UI state
   const [activeTab, setActiveTab] = useState("input");
   const [theme, setTheme] = useState("scheme1");
-
-  // NEW: Home page state
-  const [showHomePage, setShowHomePage] = useState(true);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [animationComplete, setAnimationComplete] = useState(false);
 
@@ -78,19 +75,17 @@ export default function App() {
   const speechSentencesRef = useRef([]);
   const currentUtteranceRef = useRef(null);
 
-  // NEW: Home page scroll animation
+  // Home page scroll animation
   useEffect(() => {
-    if (!showHomePage) return;
     const handleScroll = () => {
       const scrollTop = window.scrollY;
-      const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = Math.min(scrollTop / (documentHeight * 0.65), 1);
+      const progress = Math.min(scrollTop / (window.innerHeight * 0.8), 1);
       setScrollProgress(progress);
-      if (progress > 0.80 && !animationComplete) setAnimationComplete(true);
+      if (progress > 0.8 && !animationComplete) setAnimationComplete(true);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [showHomePage, animationComplete]);
+  }, [animationComplete]);
 
   // Load settings from localStorage
   useEffect(() => {
@@ -119,21 +114,20 @@ export default function App() {
     setShowError(true);
   };
 
+  // YOUR CLEAN HTML RESPONSE FUNCTION
   const cleanHtmlResponse = (response) => {
   if (!response) return "";
   let cleanedResponse = response;
-
 
   // Remove HTML code block markers
   cleanedResponse = cleanedResponse.replace(/```html/g, "");
   cleanedResponse = cleanedResponse.replace(/```/g, "");
 
-
   // Remove quotes at start and end
   while (
     cleanedResponse.startsWith('"') ||
     cleanedResponse.startsWith("'") ||
-    cleanedResponse.startsWith("`")
+    cleanedResponse.startsWith("`")
   ) {
     cleanedResponse = cleanedResponse.substring(1);
   }
@@ -144,6 +138,20 @@ export default function App() {
   ) {
     cleanedResponse = cleanedResponse.substring(0, cleanedResponse.length - 1);
   }
+
+  // Trim whitespace
+  cleanedResponse = cleanedResponse.trim();
+
+  // If still starts with backticks, remove first line
+  if (cleanedResponse.indexOf("```") !== -1) {
+    const lines = cleanedResponse.split("\n");
+    lines.shift(); // Remove first line
+    cleanedResponse = lines.join("\n");
+  }
+
+  return cleanedResponse;
+};
+
 
   // Extract text from HTML
   const extractTextFromHtml = (htmlString) => {
@@ -223,16 +231,11 @@ export default function App() {
     throw new Error("Unable to fetch URL content due to CORS. Please copy-paste the article text into the textarea.");
   };
 
-  // Generate content using Gemini API
+  // YOUR GENERATE CONTENT FROM GEMINI FUNCTION
   const generateContentFromGemini = async (prompt) => {
   const payload = {
     contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: {
-      temperature: 0.7,
-      topK: 40,
-      topP: 0.95,
-      maxOutputTokens: 8192,
-    },
+    generationConfig: { temperature: 0.7, topK: 40, topP: 0.95, maxOutputTokens: 8192 },
   };
 
   for (let i = 0; i < API_ENDPOINTS.length; i++) {
@@ -242,7 +245,6 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-
       const jsonResponse = await response.json();
 
       if (!response.ok) {
@@ -250,7 +252,7 @@ export default function App() {
         throw new Error(jsonResponse.error?.message || "Unknown API error");
       }
 
-      // ✅ Fix: Properly navigate the response structure
+      // ✅ Proper optional chaining
       const generatedText =
         jsonResponse?.candidates?.[0]?.content?.parts?.[0]?.text;
 
@@ -262,7 +264,6 @@ export default function App() {
       if (i === API_ENDPOINTS.length - 1) throw error;
     }
   }
-
   return "";
 };
 
@@ -320,7 +321,8 @@ Content: ${inputText}`;
     setQuizContent(htmlContent);
   };
 
-  const generateFlashcards = async (inputText) => {
+  // YOUR GENERATE FLASHCARDS FUNCTION
+ const generateFlashcards = async (inputText) => {
   const prompt = `Create 8 flashcards from this content. Return ONLY clean HTML, no markdown fences, no emojis.
 Use this exact structure per card:
 <div class="flashcard">
@@ -332,17 +334,61 @@ Use this exact structure per card:
 Wrap all cards inside:
 <div class="flashcard-deck"> ...cards... </div>
 
-Content:
-${inputText}`;
+Content: ${inputText}`;
+  
+  const htmlContent = await generateContentFromGemini(prompt);
+  setFlashcardContent(htmlContent);
+};
+
+// ✅ Event handlers
+const handleFileChange = (e) => {
+  const file = e.target.files?.[0] || null;
+  setFileInput(file);
+};
+
+const handleGenerate = async () => {
+  setIsGenerating(true);
+  setGenStatus("Preparing your content...");
+  let processedText = textInput.trim();
 
   try {
-    const htmlContent = await generateContentFromGemini(prompt);
-    if (!htmlContent || !htmlContent.includes("flashcard-deck")) {
-      throw new Error("Invalid flashcard HTML returned.");
+    if (!processedText && urlInput && !fileInput) {
+      setGenStatus("Fetching content from URL...");
+      processedText = await fetchUrlContent(urlInput);
+      setGenStatus("URL content loaded!");
     }
-    setFlashcardContent(htmlContent);
+
+    if (!processedText && fileInput) {
+      setGenStatus("Reading file...");
+      processedText = await fileInput.text();
+    }
+
+    if (!processedText) {
+      throw new Error("Please provide text, a URL, or a file.");
+    }
+
+    setGenStatus("Creating Smart Notes...");
+    await generateSmartNotes(processedText);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    setGenStatus("Building Mind Map...");
+    await generateMindMap(processedText);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    setGenStatus("Crafting Quiz...");
+    await generateQuiz(processedText);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    setGenStatus("Designing Flashcards...");
+    await generateFlashcards(processedText);
+
+    setGenStatus("✅ All materials generated! Check the tabs above.");
+    setActiveTab("notes");
   } catch (error) {
-    showErrorDialog("Failed to generate flashcards", error);
+    showErrorDialog("Generation failed", error);
+    setGenStatus("Error occurred.");
+  } finally {
+    setIsGenerating(false);
   }
 };
 
@@ -402,8 +448,9 @@ ${inputText}`;
     utterance.pitch = 1;
     utterance.volume = 1;
     
-    const selectedVoice = pickVoice();
-    if (selectedVoice) utterance.voice = selectedVoice;
+    const selectedVoices = pickVoice();
+    if (selectedVoices && selectedVoices.length > 0)
+      utterance.voice = selectedVoices;
 
     utterance.onstart = () => {
       setIsPlaying(true);
@@ -489,459 +536,262 @@ ${inputText}`;
     setActiveTab(tab);
   };
 
-  if (showHomePage) {
-    return (
-      <div className="home-page">
-        {/* White background fill */}
-        <div className="white-bg-fill"></div>
-        
-        <img 
-          src="/Cogni-Flow-1.png" 
-          alt="Cogni-Flow Logo 1"
-          className="logo-animated logo-top"
-          style={{
-            transform: `translate(-50%, ${-scrollProgress * 180}px)`,
-            opacity: 1 - scrollProgress * 1.12
-          }}
-        />
-        <img 
-          src="/Cogni-Flow-2.png" 
-          alt="Cogni-Flow Logo 2"
-          className="logo-animated logo-bottom-left"
-          style={{
-            transform: `translate(${-scrollProgress * 120}px, ${scrollProgress * 120}px)`,
-            opacity: 1 - scrollProgress * 1.2
-          }}
-        />
-        <img 
-          src="/Cogni-Flow-3.png" 
-          alt="Cogni-Flow Logo 3"
-          className="logo-animated logo-bottom-right"
-          style={{
-            transform: `translate(${scrollProgress * 120}px, ${scrollProgress * 120}px)`,
-            opacity: 1 - scrollProgress * 1.2
-          }}
-        />
-        <img 
-          src="/Cogni-Flow-4.png" 
-          alt="Cogni-Flow Logo 4"
-          className={`logo-animated logo-center ${animationComplete ? 'to-header' : ''}`}
-          style={animationComplete ? {
-            position: 'fixed',
-            top: '20px',
-            left: '40px',
-            transform: 'scale(0.60)',
-            zIndex: 10000
-          } : {
-            transform: `translate(-50%, -50%) scale(${1 - scrollProgress * 0.36})`,
-            opacity: 1 - scrollProgress * 0.19
-          }}
-        />
+  return (
+    <div className="home-page">
+      {/* White background fill */}
+      <div className="white-bg-fill"></div>
+      
+      {/* Logo animations - FADE OUT PROPERLY */}
+      <img 
+        src="/Cogni-Flow-1.png" 
+        alt="Cogni-Flow Logo 1"
+        className="logo-animated logo-top"
+        style={{
+          transform: `translate(-50%, ${-scrollProgress * 180}px)`,
+          opacity: Math.max(0, 1 - scrollProgress * 1.5)
+        }}
+      />
+      <img 
+        src="/Cogni-Flow-2.png" 
+        alt="Cogni-Flow Logo 2"
+        className="logo-animated logo-bottom-left"
+        style={{
+          transform: `translate(${-scrollProgress * 120}px, ${scrollProgress * 120}px)`,
+          opacity: Math.max(0, 1 - scrollProgress * 1.5)
+        }}
+      />
+      <img 
+        src="/Cogni-Flow-3.png" 
+        alt="Cogni-Flow Logo 3"
+        className="logo-animated logo-bottom-right"
+        style={{
+          transform: `translate(${scrollProgress * 120}px, ${scrollProgress * 120}px)`,
+          opacity: Math.max(0, 1 - scrollProgress * 1.5)
+        }}
+      />
+      <img 
+        src="/Cogni-Flow-4.png" 
+        alt="Cogni-Flow Logo 4"
+        className={`logo-animated logo-center ${animationComplete ? 'to-header' : ''}`}
+        style={animationComplete || scrollProgress > 0.8 ? {
+          position: 'fixed',
+          top: '20px',
+          left: '40px',
+          transform: 'scale(0.60)',
+          zIndex: 10000
+        } : {
+          transform: `translate(-50%, -50%) scale(${1 - scrollProgress * 0.36})`,
+          opacity: Math.max(0, 1 - scrollProgress * 0.8)
+        }}
+      />
 
-        <div className="hero-section">
-          <div className="hero-content">
-            <h1 className="hero-title">Welcome to Cogni-Flow</h1>
-            <p className="hero-subtitle">Where every learner finds their flow</p>
-            {animationComplete && (
-              <button 
-                className="enter-app-btn"
-                onClick={() => setShowHomePage(false)}
-              >
-                Enter App
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Main App Content - Scrollable below hero */}
-        <div className="main-app-content" style={{ 
-          position: 'relative',
-          background: 'black',
-          minHeight: '100vh',
-          zIndex: 1000,
-          marginTop: '100vh'
-        }}>
-          <div className="App" data-theme={theme} style={{ 
-            background: 'black',
-            color: 'white',
-            minHeight: '100vh'
-          }}>
-            <header className="header" style={{ background: 'black', color: 'white' }}>
-              <div className="logo-section">
-                <div className="logo">
-                  <img src="/Cogni-Flow-4.png" alt="Cogni-Flow Logo" />
-                </div>
-                <div className="title-area">
-                  <h1 style={{ color: 'white' }}>Cogni-Flow</h1>
-                  <p className="subtitle" style={{ color: 'white' }}>Your Digital Learning Companion</p>
-                </div>
-              </div>
-              <div className="right">
-                <button onClick={() => setShowSettings(true)} title="Settings">⚙️</button>
-                <button onClick={() => setTheme(theme === "scheme1" ? "scheme2" : "scheme1")} title="Switch Color Scheme">🎨</button>
-              </div>
-            </header>
-
-            <main>
-              <nav>
-                <button className={activeTab === "input" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("input")}>Input</button>
-                <button className={activeTab === "notes" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("notes")}>Smart Notes</button>
-                <button className={activeTab === "mindmap" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("mindmap")}>Mind Map</button>
-                <button className={activeTab === "quiz" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("quiz")}>Quiz</button>
-                <button className={activeTab === "flashcard" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("flashcard")}>Flashcards</button>
-              </nav>
-
-              {activeTab === "input" && (
-                <section className="tab-panel active">
-                  <textarea
-                    value={textInput}
-                    onChange={(e) => setTextInput(e.target.value)}
-                    placeholder="Paste your text here and watch the magic happen! Upload a file or enter a link to get started..."
-                  />
-                  <input type="file" onChange={handleFileChange} accept=".txt,.md" />
-                  <input
-                    type="url"
-                    value={urlInput}
-                    onChange={(e) => setUrlInput(e.target.value)}
-                    placeholder="Paste a public article link here"
-                  />
-                  <div className="center-btn">
-                    <button onClick={handleGenerate} disabled={isGenerating}>
-                      {isGenerating ? "Generating..." : "Generate Learning Materials"}
-                    </button>
-                  </div>
-                  <div id="genStatus">{genStatus}</div>
-                </section>
-              )}
-
-              {activeTab === "notes" && (
-                <section className="tab-panel">
-                  <div className="speech-controls">
-                    <button onClick={handlePlay} className="speech-btn primary">
-                      {isPlaying && !isPaused ? "Stop" : isPaused ? "Resume" : "Read Aloud"}
-                    </button>
-                    <button onClick={handlePause} disabled={!isPlaying || isPaused} className="speech-btn">Pause</button>
-                    <button onClick={handleRewind} disabled={!isPlaying && !isPaused} className="speech-btn">Rewind</button>
-                    <button onClick={handleSkip} disabled={!isPlaying && !isPaused} className="speech-btn">Skip</button>
-                    <label htmlFor="speedSlider" className="ml-2">Speed</label>
-                    <input
-                      id="speedSlider"
-                      type="range"
-                      min="0.5"
-                      max="2"
-                      step="0.1"
-                      value={speechSpeed}
-                      onChange={(e) => onChangeSpeed(e.target.value)}
-                    />
-                    <span>{speechSpeed.toFixed(1)}x</span>
-                  </div>
-                  <div style={{ textAlign: settings.textAlign }} dangerouslySetInnerHTML={{ __html: notesContent }} />
-                </section>
-              )}
-
-              {activeTab === "mindmap" && (
-                <section className="tab-panel">
-                  <div dangerouslySetInnerHTML={{ __html: mindmapContent }} />
-                </section>
-              )}
-
-              {activeTab === "quiz" && (
-                <section className="tab-panel">
-                  <div dangerouslySetInnerHTML={{ __html: quizContent }} />
-                </section>
-              )}
-
-              {activeTab === "flashcard" && (
-                <section className="tab-panel">
-                  <div
-                    className="flashcard-host"
-                    onClick={(e) => {
-                      const card = e.target.closest(".flashcard");
-                      if (card) card.classList.toggle("flipped");
-                    }}
-                    dangerouslySetInnerHTML={{ __html: flashcardContent }}
-                  />
-                </section>
-              )}
-            </main>
-
-            {showSettings && (
-              <div className="modal-bg" onClick={() => setShowSettings(false)}>
-                <div className="modal" onClick={(e) => e.stopPropagation()}>
-                  <h2>Settings</h2>
-                  <div className="form-row">
-                    <label>Font Size</label>
-                    <input
-                      type="range"
-                      min="12"
-                      max="24"
-                      value={settings.fontSize}
-                      onChange={(e) => setSettings({ ...settings, fontSize: parseInt(e.target.value) })}
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label>Font Family</label>
-                    <select
-                      value={settings.fontFamily}
-                      onChange={(e) => setSettings({ ...settings, fontFamily: e.target.value })}
-                    >
-                      <option>Lexend, Arial, sans-serif</option>
-                      <option>Inter, Arial, sans-serif</option>
-                      <option>OpenDyslexic, Arial, sans-serif</option>
-                    </select>
-                  </div>
-                  <div className="form-row">
-                    <label>Text Align</label>
-                    <select
-                      value={settings.textAlign}
-                      onChange={(e) => setSettings({ ...settings, textAlign: e.target.value })}
-                    >
-                      <option value="left">Left</option>
-                      <option value="justify">Justify</option>
-                      <option value="center">Center</option>
-                    </select>
-                  </div>
-                  <div className="form-row">
-                    <label>Line Height</label>
-                    <input
-                      type="range"
-                      min="1.2"
-                      max="2.5"
-                      step="0.1"
-                      value={settings.lineHeight}
-                      onChange={(e) => setSettings({ ...settings, lineHeight: parseFloat(e.target.value) })}
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label>Letter Spacing</label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="3"
-                      step="0.1"
-                      value={settings.letterSpacing}
-                      onChange={(e) => setSettings({ ...settings, letterSpacing: parseFloat(e.target.value) })}
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={settings.bionic}
-                        onChange={(e) => setSettings({ ...settings, bionic: e.target.checked })}
-                      />
-                      Bionic Reading
-                    </label>
-                  </div>
-                  <div className="actions">
-                    <button onClick={() => setShowSettings(false)}>Close</button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {showError && (
-              <div className="modal-bg" onClick={() => setShowError(false)}>
-                <div className="modal" onClick={(e) => e.stopPropagation()}>
-                  <h2 style={{ color: "var(--accent4)" }}>Error</h2>
-                  <p className="mb-4">{errorMessage}</p>
-                  <button onClick={() => setShowError(false)}>Got It!</button>
-                </div>
-              </div>
-            )}
-          </div>
+      {/* Hero section - FADES OUT ON SCROLL */}
+      <div className="hero-section" style={{
+        opacity: Math.max(0, 1 - scrollProgress * 1.2)
+      }}>
+        <div className="hero-content">
+          <h1 className="hero-title">Welcome to Cogni-Flow</h1>
+          <p className="hero-subtitle">Where every learner finds their flow</p>
         </div>
       </div>
-    );
-  }
 
-  // Original App Content (when Enter App is clicked)
-  return (
-    <div className="App" data-theme={theme}>
-      <header className="header">
-        <div className="logo-section">
-          <div className="logo">
-            <img src="/Cogni-Flow-4.png" alt="Cogni-Flow Logo" />
-          </div>
-          <div className="title-area">
-            <h1>Cogni-Flow</h1>
-            <p className="subtitle">Your Digital Learning Companion</p>
-          </div>
-        </div>
-        <div className="right">
-          <button onClick={() => setShowSettings(true)} title="Settings">⚙️</button>
-          <button onClick={() => setTheme(theme === "scheme1" ? "scheme2" : "scheme1")} title="Switch Color Scheme">🎨</button>
-        </div>
-      </header>
-
-      <main>
-        <nav>
-          <button className={activeTab === "input" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("input")}>Input</button>
-          <button className={activeTab === "notes" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("notes")}>Smart Notes</button>
-          <button className={activeTab === "mindmap" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("mindmap")}>Mind Map</button>
-          <button className={activeTab === "quiz" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("quiz")}>Quiz</button>
-          <button className={activeTab === "flashcard" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("flashcard")}>Flashcards</button>
-        </nav>
-
-        {activeTab === "input" && (
-          <section className="tab-panel active">
-            <textarea
-              value={textInput}
-              onChange={(e) => setTextInput(e.target.value)}
-              placeholder="Paste your text here and watch the magic happen! Upload a file or enter a link to get started..."
-            />
-            <input type="file" onChange={handleFileChange} accept=".txt,.md" />
-            <input
-              type="url"
-              value={urlInput}
-              onChange={(e) => setUrlInput(e.target.value)}
-              placeholder="Paste a public article link here"
-            />
-            <div className="center-btn">
-              <button onClick={handleGenerate} disabled={isGenerating}>
-                {isGenerating ? "Generating..." : "Generate Learning Materials"}
-              </button>
+      {/* Main App Content - APPEARS ON SCROLL */}
+      <div className="main-app-content" style={{ 
+        marginTop: '100vh',
+        background: 'white',
+        borderRadius: '40px 40px 0 0',
+        paddingTop: '60px',
+        boxShadow: '0 -20px 50px rgba(0,0,0,0.1)',
+        position: 'relative',
+        zIndex: 1000,
+        minHeight: '100vh'
+      }}>
+        <div className="App" data-theme={theme}>
+          <header className="header">
+            <div className="logo-section">
+              <div className="logo">
+                <img src="/Cogni-Flow-4.png" alt="Cogni-Flow Logo" />
+              </div>
+              <div className="title-area">
+                <h1>Cogni-Flow</h1>
+                <p className="subtitle">Your Digital Learning Companion</p>
+              </div>
             </div>
-            <div id="genStatus">{genStatus}</div>
-          </section>
-        )}
+            <div className="right">
+              <button onClick={() => setShowSettings(true)} title="Settings">⚙️</button>
+              <button onClick={() => setTheme(theme === "scheme1" ? "scheme2" : "scheme1")} title="Switch Color Scheme">🎨</button>
+            </div>
+          </header>
 
-        {activeTab === "notes" && (
-          <section className="tab-panel">
-            <div className="speech-controls">
-              <button onClick={handlePlay} className="speech-btn primary">
-                {isPlaying && !isPaused ? "Stop" : isPaused ? "Resume" : "Read Aloud"}
-              </button>
-              <button onClick={handlePause} disabled={!isPlaying || isPaused} className="speech-btn">Pause</button>
-              <button onClick={handleRewind} disabled={!isPlaying && !isPaused} className="speech-btn">Rewind</button>
-              <button onClick={handleSkip} disabled={!isPlaying && !isPaused} className="speech-btn">Skip</button>
-              <label htmlFor="speedSlider" className="ml-2">Speed</label>
-              <input
-                id="speedSlider"
-                type="range"
-                min="0.5"
-                max="2"
-                step="0.1"
-                value={speechSpeed}
-                onChange={(e) => onChangeSpeed(e.target.value)}
-              />
-              <span>{speechSpeed.toFixed(1)}x</span>
-            </div>
-            <div style={{ textAlign: settings.textAlign }} dangerouslySetInnerHTML={{ __html: notesContent }} />
-          </section>
-        )}
+          <main>
+            <nav>
+              <button className={activeTab === "input" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("input")}>Input</button>
+              <button className={activeTab === "notes" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("notes")}>Smart Notes</button>
+              <button className={activeTab === "mindmap" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("mindmap")}>Mind Map</button>
+              <button className={activeTab === "quiz" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("quiz")}>Quiz</button>
+              <button className={activeTab === "flashcard" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("flashcard")}>Flashcards</button>
+            </nav>
 
-        {activeTab === "mindmap" && (
-          <section className="tab-panel">
-            <div dangerouslySetInnerHTML={{ __html: mindmapContent }} />
-          </section>
-        )}
-
-        {activeTab === "quiz" && (
-          <section className="tab-panel">
-            <div dangerouslySetInnerHTML={{ __html: quizContent }} />
-          </section>
-        )}
-
-        {activeTab === "flashcard" && (
-          <section className="tab-panel">
-            <div
-              className="flashcard-host"
-              onClick={(e) => {
-                const card = e.target.closest(".flashcard");
-                if (card) card.classList.toggle("flipped");
-              }}
-              dangerouslySetInnerHTML={{ __html: flashcardContent }}
-            />
-          </section>
-        )}
-      </main>
-
-      {showSettings && (
-        <div className="modal-bg" onClick={() => setShowSettings(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2>Settings</h2>
-            <div className="form-row">
-              <label>Font Size</label>
-              <input
-                type="range"
-                min="12"
-                max="24"
-                value={settings.fontSize}
-                onChange={(e) => setSettings({ ...settings, fontSize: parseInt(e.target.value) })}
-              />
-            </div>
-            <div className="form-row">
-              <label>Font Family</label>
-              <select
-                value={settings.fontFamily}
-                onChange={(e) => setSettings({ ...settings, fontFamily: e.target.value })}
-              >
-                <option>Lexend, Arial, sans-serif</option>
-                <option>Inter, Arial, sans-serif</option>
-                <option>OpenDyslexic, Arial, sans-serif</option>
-              </select>
-            </div>
-            <div className="form-row">
-              <label>Text Align</label>
-              <select
-                value={settings.textAlign}
-                onChange={(e) => setSettings({ ...settings, textAlign: e.target.value })}
-              >
-                <option value="left">Left</option>
-                <option value="justify">Justify</option>
-                <option value="center">Center</option>
-              </select>
-            </div>
-            <div className="form-row">
-              <label>Line Height</label>
-              <input
-                type="range"
-                min="1.2"
-                max="2.5"
-                step="0.1"
-                value={settings.lineHeight}
-                onChange={(e) => setSettings({ ...settings, lineHeight: parseFloat(e.target.value) })}
-              />
-            </div>
-            <div className="form-row">
-              <label>Letter Spacing</label>
-              <input
-                type="range"
-                min="0"
-                max="3"
-                step="0.1"
-                value={settings.letterSpacing}
-                onChange={(e) => setSettings({ ...settings, letterSpacing: parseFloat(e.target.value) })}
-              />
-            </div>
-            <div className="form-row">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={settings.bionic}
-                  onChange={(e) => setSettings({ ...settings, bionic: e.target.checked })}
+            {activeTab === "input" && (
+              <section className="tab-panel active">
+                <textarea
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  placeholder="Paste your text here and watch the magic happen! Upload a file or enter a link to get started..."
                 />
-                Bionic Reading
-              </label>
-            </div>
-            <div className="actions">
-              <button onClick={() => setShowSettings(false)}>Close</button>
-            </div>
-          </div>
-        </div>
-      )}
+                <input type="file" onChange={handleFileChange} accept=".txt,.md" />
+                <input
+                  type="url"
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  placeholder="Paste a public article link here"
+                />
+                <div className="center-btn">
+                  <button onClick={handleGenerate} disabled={isGenerating}>
+                    {isGenerating ? "Generating..." : "Generate Learning Materials"}
+                  </button>
+                </div>
+                <div id="genStatus">{genStatus}</div>
+              </section>
+            )}
 
-      {showError && (
-        <div className="modal-bg" onClick={() => setShowError(false)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ color: "var(--accent4)" }}>Error</h2>
-            <p className="mb-4">{errorMessage}</p>
-            <button onClick={() => setShowError(false)}>Got It!</button>
-          </div>
+            {activeTab === "notes" && (
+              <section className="tab-panel">
+                <div className="speech-controls">
+                  <button onClick={handlePlay} className="speech-btn primary">
+                    {isPlaying && !isPaused ? "Stop" : isPaused ? "Resume" : "Read Aloud"}
+                  </button>
+                  <button onClick={handlePause} disabled={!isPlaying || isPaused} className="speech-btn">Pause</button>
+                  <button onClick={handleRewind} disabled={!isPlaying && !isPaused} className="speech-btn">Rewind</button>
+                  <button onClick={handleSkip} disabled={!isPlaying && !isPaused} className="speech-btn">Skip</button>
+                  <label htmlFor="speedSlider" className="ml-2">Speed</label>
+                  <input
+                    id="speedSlider"
+                    type="range"
+                    min="0.5"
+                    max="2"
+                    step="0.1"
+                    value={speechSpeed}
+                    onChange={(e) => onChangeSpeed(e.target.value)}
+                  />
+                  <span>{speechSpeed.toFixed(1)}x</span>
+                </div>
+                <div style={{ textAlign: settings.textAlign }} dangerouslySetInnerHTML={{ __html: notesContent }} />
+              </section>
+            )}
+
+            {activeTab === "mindmap" && (
+              <section className="tab-panel">
+                <div dangerouslySetInnerHTML={{ __html: mindmapContent }} />
+              </section>
+            )}
+
+            {activeTab === "quiz" && (
+              <section className="tab-panel">
+                <div dangerouslySetInnerHTML={{ __html: quizContent }} />
+              </section>
+            )}
+
+            {activeTab === "flashcard" && (
+              <section className="tab-panel">
+                <div
+                  className="flashcard-host"
+                  onClick={(e) => {
+                    const card = e.target.closest(".flashcard");
+                    if (card) card.classList.toggle("flipped");
+                  }}
+                  dangerouslySetInnerHTML={{ __html: flashcardContent }}
+                />
+              </section>
+            )}
+          </main>
+
+          {showSettings && (
+            <div className="modal-bg" onClick={() => setShowSettings(false)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <h2>Settings</h2>
+                <div className="form-row">
+                  <label>Font Size</label>
+                  <input
+                    type="range"
+                    min="12"
+                    max="24"
+                    value={settings.fontSize}
+                    onChange={(e) => setSettings({ ...settings, fontSize: parseInt(e.target.value) })}
+                  />
+                </div>
+                <div className="form-row">
+                  <label>Font Family</label>
+                  <select
+                    value={settings.fontFamily}
+                    onChange={(e) => setSettings({ ...settings, fontFamily: e.target.value })}
+                  >
+                    <option>Lexend, Arial, sans-serif</option>
+                    <option>Inter, Arial, sans-serif</option>
+                    <option>OpenDyslexic, Arial, sans-serif</option>
+                  </select>
+                </div>
+                <div className="form-row">
+                  <label>Text Align</label>
+                  <select
+                    value={settings.textAlign}
+                    onChange={(e) => setSettings({ ...settings, textAlign: e.target.value })}
+                  >
+                    <option value="left">Left</option>
+                    <option value="justify">Justify</option>
+                    <option value="center">Center</option>
+                  </select>
+                </div>
+                <div className="form-row">
+                  <label>Line Height</label>
+                  <input
+                    type="range"
+                    min="1.2"
+                    max="2.5"
+                    step="0.1"
+                    value={settings.lineHeight}
+                    onChange={(e) => setSettings({ ...settings, lineHeight: parseFloat(e.target.value) })}
+                  />
+                </div>
+                <div className="form-row">
+                  <label>Letter Spacing</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="3"
+                    step="0.1"
+                    value={settings.letterSpacing}
+                    onChange={(e) => setSettings({ ...settings, letterSpacing: parseFloat(e.target.value) })}
+                  />
+                </div>
+                <div className="form-row">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={settings.bionic}
+                      onChange={(e) => setSettings({ ...settings, bionic: e.target.checked })}
+                    />
+                    Bionic Reading
+                  </label>
+                </div>
+                <div className="actions">
+                  <button onClick={() => setShowSettings(false)}>Close</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showError && (
+            <div className="modal-bg" onClick={() => setShowError(false)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <h2 style={{ color: "var(--color-red-500)" }}>Error</h2>
+                <p className="mb-4">{errorMessage}</p>
+                <button onClick={() => setShowError(false)}>Got It!</button>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
-}
 }

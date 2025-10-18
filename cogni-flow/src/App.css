@@ -2662,3 +2662,13 @@ select {
   outline: none;
   box-shadow: var(--focus-ring);
 }
+
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+.home-page {
+  min-height: 100vh;
+  overflow: hidden;
+}
