@@ -81,6 +81,8 @@ export default function App() {
       const scrollTop = window.scrollY;
       const progress = Math.min(scrollTop / (window.innerHeight * 0.8), 1);
       setScrollProgress(progress);
+      const bg = document.querySelector(".front-bg");
+      if (bg) bg.style.transform = `translateY(${scrollTop *0.4}px)`;
       if (progress > 0.8 && !animationComplete) setAnimationComplete(true);
     };
     window.addEventListener('scroll', handleScroll);
@@ -538,62 +540,59 @@ const handleGenerate = async () => {
 
   return (
     <div className="home-page">
-      {/* White background fill */}
-      <div className="white-bg-fill"></div>
-      
-      {/* Logo animations - FADE OUT PROPERLY */}
-      <img 
-        src="/Cogni-Flow-1.png" 
-        alt="Cogni-Flow Logo 1"
-        className="logo-animated logo-top"
-        style={{
-          transform: `translate(-50%, ${-scrollProgress * 180}px)`,
-          opacity: Math.max(0, 1 - scrollProgress * 1.5)
-        }}
-      />
-      <img 
-        src="/Cogni-Flow-2.png" 
-        alt="Cogni-Flow Logo 2"
-        className="logo-animated logo-bottom-left"
-        style={{
-          transform: `translate(${-scrollProgress * 120}px, ${scrollProgress * 120}px)`,
-          opacity: Math.max(0, 1 - scrollProgress * 1.5)
-        }}
-      />
-      <img 
-        src="/Cogni-Flow-3.png" 
-        alt="Cogni-Flow Logo 3"
-        className="logo-animated logo-bottom-right"
-        style={{
-          transform: `translate(${scrollProgress * 120}px, ${scrollProgress * 120}px)`,
-          opacity: Math.max(0, 1 - scrollProgress * 1.5)
-        }}
-      />
-      <img 
-        src="/Cogni-Flow-4.png" 
-        alt="Cogni-Flow Logo 4"
-        className={`logo-animated logo-center ${animationComplete ? 'to-header' : ''}`}
-        style={animationComplete || scrollProgress > 0.8 ? {
-          position: 'fixed',
-          top: '20px',
-          left: '40px',
-          transform: 'scale(0.60)',
-          zIndex: 10000
-        } : {
-          transform: `translate(-50%, -50%) scale(${1 - scrollProgress * 0.36})`,
-          opacity: Math.max(0, 1 - scrollProgress * 0.8)
-        }}
-      />
+      <section className="front-section">
+  <div className="front-bg"></div>
 
-      {/* Hero section - FADES OUT ON SCROLL */}
-      <div className="hero-section" style={{
-        opacity: Math.max(0, 1 - scrollProgress * 1.2)
-      }}>
-        <div className="hero-content">
-          <h1 className="hero-title">Welcome to Cogni-Flow</h1>
-          <p className="hero-subtitle">Where every learner finds their flow</p>
-        </div>
-      </div>
+  <img
+    src="/Cogni-Flow-1.png"
+    alt="Cogni-Flow Logo 1"
+    className="logo-animated logo-top"
+    style={{
+      transform: `translate(-50%, ${-scrollProgress * 180}px)`,
+      opacity: Math.max(0, 1 - scrollProgress * 1.5),
+    }}
+  />
+
+  <img
+    src="/Cogni-Flow-2.png"
+    alt="Cogni-Flow Logo 2"
+    className="logo-animated logo-bottom-left"
+    style={{
+      transform: `translate(${-scrollProgress * 120}px, ${scrollProgress * 120}px)`,
+      opacity: Math.max(0, 1 - scrollProgress * 1.5),
+    }}
+  />
+
+  <img
+    src="/Cogni-Flow-3.png"
+    alt="Cogni-Flow Logo 3"
+    className="logo-animated logo-bottom-right"
+    style={{
+      transform: `translate(${scrollProgress * 120}px, ${scrollProgress * 120}px)`,
+      opacity: Math.max(0, 1 - scrollProgress * 1.5),
+    }}
+  />
+
+  <img
+    src="/Cogni-Flow-4.png"
+    alt="Cogni-Flow Logo 4"
+    className={`logo-animated logo-center ${animationComplete ? 'to-header' : ''}`}
+    style={
+      animationComplete || scrollProgress > 0.8
+        ? {
+            position: 'fixed',
+            top: '20px',
+            left: '40px',
+            transform: 'scale(0.60)',
+            zIndex: 10000,
+          }
+        : {
+            transform: `translate(-50%, -50%) scale(${1 - scrollProgress * 0.36})`,
+            opacity: Math.max(0, 1 - scrollProgress * 0.8),
+          }   
+          }
+          />
+          </section>
 
       {/* Main App Content - APPEARS ON SCROLL */}
       <div className="main-app-content" style={{ 
