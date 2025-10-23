@@ -2,11 +2,11 @@
     /* ===== YOUR CUSTOM COLOR PALETTE ===== */
   /* Color assignments:
      #7cccae - White: Backgrounds
-     #ff7523 - Light Blue: Primary actions, links
+     #ff000d - Light Blue: Primary actions, links
      #ffd34d - Light Yellow: Highlights, hover effects
      #ffba00 - Golden Yellow: Secondary buttons, accents
      #7cccae - Mint Green: Success states
-     #ff7523 - Orange: Errors, warnings
+     #ff000d - Orange: Errors, warnings
      #000000 - Dark Blue: Text, headers
   */
   
@@ -25,12 +25,12 @@
   --color-slate-900: #000000;
   --color-teal-300: #7cccae;
   --color-teal-400: #7cccae;
-  --color-teal-500: #ff7523;
-  --color-teal-600: #ff7523;
+  --color-teal-500: #ff000d;
+  --color-teal-600: #ff000d;
   --color-teal-700: #000000;
-  --color-teal-800: #ff7523;
-  --color-red-400: #ff7523;
-  --color-red-500: #ff7523;
+  --color-teal-800: #ff000d;
+  --color-red-400: #ff000d;
+  --color-red-500: #ff000d;
   --color-orange-400: #ffd34d;
   --color-orange-500: #ffba00;
 
@@ -39,8 +39,8 @@
   --color-teal-500-rgb: 0, 164, 206;
   --color-slate-900-rgb: 0, 24, 109;
   --color-slate-500-rgb: 0, 24, 109;
-  --color-red-500-rgb: 255, 117, 35;
-  --color-red-400-rgb: 255, 117, 35;
+  --color-red-500-rgb: 255, 0, 13;
+  --color-red-400-rgb: 255, 0, 13;
   --color-orange-500-rgb: 255, 186, 0;
   --color-orange-400-rgb: 255, 211, 77;
 
@@ -59,8 +59,8 @@
   --color-surface: #ffba00;  /* Dark yellow panels */
   --color-text: #000000;
   --color-text-secondary: #000000;
-  --color-primary: #ff7523;
-  --color-primary-hover: #ff9555;
+  --color-primary: #ff000d;
+  --color-primary-hover: #ff4040;
   --color-primary-active: #ff6020;
   --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
   --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
@@ -86,7 +86,7 @@
 
   /* RGB versions for opacity control */
   --color-success-rgb: 0, 164, 206;
-  --color-error-rgb: 255, 117, 35;
+  --color-error-rgb: 255, 0, 13;
   --color-warning-rgb: 255, 186, 0;
   --color-info-rgb: 0, 24, 109;
 
@@ -285,8 +285,8 @@
   --color-surface: #ffba00;  /* Dark yellow panels */
   --color-text: #000000;
   --color-text-secondary: #000000;
-  --color-primary: #ff7523;
-  --color-primary-hover: #ff9555;
+  --color-primary: #ff000d;
+  --color-primary-hover: #ff4040;
   --color-primary-active: #ff6020;
   --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
   --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
@@ -590,12 +590,12 @@ select.form-control {
 
 .status--error {
   background-color: rgba(
-    var(--color-error-rgb, 255, 117, 35),
+    var(--color-error-rgb, 255, 0, 13),
     var(--status-bg-opacity)
   );
   color: var(--color-error);
   border: 1px solid
-    rgba(var(--color-error-rgb, 255, 117, 35), var(--status-border-opacity));
+    rgba(var(--color-error-rgb, 255, 0, 13), var(--status-border-opacity));
 }
 
 .status--warning {
@@ -753,11 +753,11 @@ select.form-control {
     /* ===== YOUR CUSTOM COLOR PALETTE ===== */
   /* Color assignments:
      #7cccae - White: Backgrounds
-     #ff7523 - Light Blue: Primary actions, links
+     #ff000d - Light Blue: Primary actions, links
      #ffd34d - Light Yellow: Highlights, hover effects
      #ffba00 - Golden Yellow: Secondary buttons, accents
      #7cccae - Mint Green: Success states
-     #ff7523 - Orange: Errors, warnings
+     #ff000d - Orange: Errors, warnings
      #000000 - Dark Blue: Text, headers
   */
   
@@ -776,12 +776,12 @@ select.form-control {
   --color-slate-900: #000000;
   --color-teal-300: #7cccae;
   --color-teal-400: #7cccae;
-  --color-teal-500: #ff7523;
-  --color-teal-600: #ff7523;
+  --color-teal-500: #ff000d;
+  --color-teal-600: #ff000d;
   --color-teal-700: #000000;
-  --color-teal-800: #ff7523;
-  --color-red-400: #ff7523;
-  --color-red-500: #ff7523;
+  --color-teal-800: #ff000d;
+  --color-red-400: #ff000d;
+  --color-red-500: #ff000d;
   --color-orange-400: #ffd34d;
   --color-orange-500: #ffba00;
 
@@ -790,8 +790,8 @@ select.form-control {
   --color-teal-500-rgb: 0, 164, 206;
   --color-slate-900-rgb: 0, 24, 109;
   --color-slate-500-rgb: 0, 24, 109;
-  --color-red-500-rgb: 255, 117, 35;
-  --color-red-400-rgb: 255, 117, 35;
+  --color-red-500-rgb: 255, 0, 13;
+  --color-red-400-rgb: 255, 0, 13;
   --color-orange-500-rgb: 255, 186, 0;
   --color-orange-400-rgb: 255, 211, 77;
 
@@ -810,8 +810,8 @@ select.form-control {
   --color-surface: #ffba00;  /* Dark yellow panels */
   --color-text: #000000;
   --color-text-secondary: #000000;
-  --color-primary: #ff7523;
-  --color-primary-hover: #ff9555;
+  --color-primary: #ff000d;
+  --color-primary-hover: #ff4040;
   --color-primary-active: #ff6020;
   --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
   --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
@@ -837,7 +837,7 @@ select.form-control {
 
   /* RGB versions for opacity control */
   --color-success-rgb: 0, 164, 206;
-  --color-error-rgb: 255, 117, 35;
+  --color-error-rgb: 255, 0, 13;
   --color-warning-rgb: 255, 186, 0;
   --color-info-rgb: 0, 24, 109;
 
@@ -1036,8 +1036,8 @@ select.form-control {
   --color-surface: #ffba00;  /* Dark yellow panels */
   --color-text: #000000;
   --color-text-secondary: #000000;
-  --color-primary: #ff7523;
-  --color-primary-hover: #ff9555;
+  --color-primary: #ff000d;
+  --color-primary-hover: #ff4040;
   --color-primary-active: #ff6020;
   --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
   --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
@@ -1341,12 +1341,12 @@ select.form-control {
 
 .status--error {
   background-color: rgba(
-    var(--color-error-rgb, 255, 117, 35),
+    var(--color-error-rgb, 255, 0, 13),
     var(--status-bg-opacity)
   );
   color: var(--color-error);
   border: 1px solid
-    rgba(var(--color-error-rgb, 255, 117, 35), var(--status-border-opacity));
+    rgba(var(--color-error-rgb, 255, 0, 13), var(--status-border-opacity));
 }
 
 .status--warning {
@@ -1609,7 +1609,7 @@ h1 {
 }
 
 .right button:hover {
-  background: #ff9555;  /* Light red hover */
+  background: #ff4040;  /* Lighter red hover */
 }
 
 .right button:focus-visible {
@@ -1823,7 +1823,7 @@ button {
 }
 
 button:hover {
-  background: #ff9555;  /* Light red hover */
+  background: #ff4040;  /* Lighter red hover */
 }
 
 button:focus-visible {
@@ -2180,7 +2180,7 @@ select {
 }
 
 .actions button:hover {
-  background: #ff9555;  /* Light red hover */
+  background: #ff4040;  /* Lighter red hover */
 }
 
 .actions button:focus-visible {
@@ -2574,7 +2574,7 @@ select {
 }
 
 .main-app-content button:hover {
-  background: #ff9555;  /* Light red hover */
+  background: #ff4040;  /* Lighter red hover */
 }
 
 /* Hero section adjustments */
@@ -2742,7 +2742,7 @@ html, body {
   height: 100vh;  /* Full viewport height - covers whole screen */
   overflow: hidden;
   position: relative;
-  background: #ff7523; /* Light Blue fills empty space */
+  background: #ff000d; /* Light Blue fills empty space */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2801,7 +2801,7 @@ html, body {
 
 /* Update header to use dark blue */
 .header {
-  background: #ff9555 !important;
+  background: #ff4040 !important;
   border-bottom: 3px solid #000000 !important;
 }
 
@@ -2815,22 +2815,22 @@ html, body {
 
 /* Navigation updates */
 .tab-btn:hover {
-  background: #ff9555 !important;  /* Light red hover */
+  background: #ff4040 !important;  /* Lighter red hover */
   color: #ffffff !important;  /* White text on orange */
 }
 
 .tab-btn.active {
-  background: #ff7523 !important;
+  background: #ff000d !important;
   color: #ffffff !important;
 }
 
 /* Settings buttons */
 .right button {
-  background: #ff9555 !important;
+  background: #ff4040 !important;
 }
 
 .right button:hover {
-  background: #ff9555;  /* Light red hover */
+  background: #ff4040;  /* Lighter red hover */
 }
 
 /* Update body background */
@@ -2861,7 +2861,7 @@ body {
 
 /* Header styling */
 .header {
-  background: #ff7523 !important;  /* Red header */  /* Red header */
+  background: #ff000d !important;  /* Pure red header */  /* Pure red header */
   border-bottom: 3px solid #000000 !important;  /* Black border */
 }
 
@@ -2875,8 +2875,6 @@ body {
 .logo-space img {
   width: 64px;
   height: 64px;
-  border-radius: 8px;
-  border: 2px solid #000000;
 }
 
 /* Tab styling */
@@ -2892,28 +2890,25 @@ body {
 }
 
 .tab-btn.active {
-  background: #ff7523 !important;  /* Red active tab */
+  background: #ff000d !important;  /* Pure red active tab */
   color: #ffffff !important;  /* White text on red */
   border-bottom-color: #000000 !important;
 }
 
 /* Button styling */
 button {
-  background: #ff7523 !important;  /* Red buttons */
+  background: #ff000d !important;  /* Red buttons */
   color: #ffffff !important;
 }
 
 button:hover {
-  background: #ff9555;  /* Light red hover */
+  background: #ff4040;  /* Lighter red hover */
 }
 
 /* Settings buttons specific */
-.right button {
-  background: #ff7523 !important;  /* Red */
-}
 
 .right button:hover {
-  background: #ff9555;  /* Light red hover */
+  background: #ff4040;  /* Lighter red hover */
 }
 
 /* Input fields */
@@ -2924,8 +2919,8 @@ input, textarea, select {
 }
 
 input:focus, textarea:focus, select:focus {
-  border-color: #ff7523 !important;  /* Red focus */
-  box-shadow: 0 0 0 3px rgba(255, 117, 35, 0.2) !important;
+  border-color: #ff000d !important;  /* Red focus */
+  box-shadow: 0 0 0 3px rgba(255, 0, 13, 0.2) !important;
 }
 
 /* Panels and cards */
@@ -2962,7 +2957,7 @@ body {
 
 /* Flashcard colors */
 .flashcard-front {
-  background: #ff7523 !important;  /* Red */
+  background: #ff000d !important;  /* Red */
 }
 
 .flashcard-back {
@@ -2972,11 +2967,11 @@ body {
 
 /* Links */
 a {
-  color: #ff7523 !important;  /* Red links */
+  color: #ff000d !important;  /* Red links */
 }
 
 a:hover {
-  color: #ff9555 !important;  /* Light red hover */
+  color: #ff4040 !important;  /* Lighter red hover */
 }
 
 /* 
@@ -2990,20 +2985,14 @@ a:hover {
   padding: var(--space-8);
 }
 
-.logo-space img {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  background-color: #ffffff;
-  padding: 4px;
-}
-
 /* Ensure all buttons are red */
 button, .btn {
-  background: #ff7523 !important;
+  background: #ff000d !important;
   color: #ffffff !important;
 }
 
 button:hover, .btn:hover {
-  background: #ff9555 !important;
+  background: #ff4040 !important;
 }
 
 /* Ensure all inputs have black borders and yellow background */
@@ -3015,7 +3004,7 @@ input, textarea, select {
 
 input:focus, textarea:focus, select:focus {
   border-color: #000000 !important;
-  box-shadow: 0 0 0 3px rgba(255, 117, 35, 0.2) !important;
+  box-shadow: 0 0 0 3px rgba(255, 0, 13, 0.2) !important;
 }
 
 /* Tab panels yellow background */
@@ -3048,11 +3037,11 @@ body {
 
 /* Links red */
 a {
-  color: #ff7523 !important;
+  color: #ff000d !important;
 }
 
 a:hover {
-  color: #ff9555 !important;
+  color: #ff4040 !important;
 }
 
 /* All text black for readability */
@@ -3074,22 +3063,19 @@ button *,
 }
 
 .tab-btn:hover {
-  background: #ff9555 !important;
+  background: #ff4040 !important;
   color: #ffffff !important;
 }
 
 .tab-btn.active {
-  background: #ff7523 !important;
+  background: #ff000d !important;
   color: #ffffff !important;
 }
 
 /* Settings buttons red */
-.right button {
-  background: #ff7523 !important;
-}
 
 .right button:hover {
-  background: #ff9555 !important;
+  background: #ff4040 !important;
 }
 
 /* Speech controls */
@@ -3098,16 +3084,16 @@ button *,
 }
 
 .speech-btn {
-  background: #ff7523 !important;
+  background: #ff000d !important;
 }
 
 .speech-btn:hover {
-  background: #ff9555 !important;
+  background: #ff4040 !important;
 }
 
 /* Flashcards */
 .flashcard-front {
-  background: #ff7523 !important;
+  background: #ff000d !important;
 }
 
 .flashcard-back {
@@ -3122,11 +3108,27 @@ button *,
 }
 
 .status-error {
-  background: rgba(255, 117, 35, 0.2) !important;
-  border: 1px solid #ff7523 !important;
+  background: rgba(255, 0, 13, 0.2) !important;
+  border: 1px solid #ff000d !important;
 }
 
 .status-warning {
   background: rgba(255, 186, 0, 0.2) !important;
   border: 1px solid #ffba00 !important;
+}
+
+
+/* Header buttons specifically - RED */
+.header .right button,
+.header button[title="Settings"],
+.header button[title="Switch Color Scheme"] {
+  background: #ff4b54 !important;  /* Red header buttons */
+  color: #ffffff !important;
+}
+
+.header .right button:hover,
+.header button[title="Settings"]:hover,
+.header button[title="Switch Color Scheme"]:hover {
+  background: #ff7c83 !important;  /* Lighter red hover */
+  color: #ffffff !important;
 }

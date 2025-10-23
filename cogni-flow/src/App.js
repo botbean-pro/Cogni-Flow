@@ -1,18 +1,25 @@
 import React, { useEffect, useRef, useState } from "react";
-import "./App.css";
-
-// Firebase Configuration
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
+import "./App.css";
 
+// Add Google Fonts link for Libre Franklin
+if (!document.querySelector('link[href*="Libre+Franklin"]')) {
+  const link = document.createElement('link');
+  link.href = 'https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&display=swap';
+  link.rel = 'stylesheet';
+  document.head.appendChild(link);
+}
+
+// Firebase Configuration - SECURITY NOTE: Move to environment variables
 const firebaseConfig = {
-  apiKey: "AIzaSyDyy8AM0mc9oLi8ixywP4qo2dpJp2TYG6o",
-  authDomain: "cogni-flow-d41db.firebaseapp.com",
-  projectId: "cogni-flow-d41db",
-  storageBucket: "cogni-flow-d41db.firebasestorage.app",
-  messagingSenderId: "812584499671",
-  appId: "1:812584499671:web:14516059d67a937ec47392",
-  measurementId: "G-5W2RWBEHLE",
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "AIzaSyDyy8AM0mc9oLi8ixywP4qo2dpJp2TYG6o",
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "cogni-flow-d41db.firebaseapp.com",
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "cogni-flow-d41db",
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "cogni-flow-d41db.firebasestorage.app",
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "812584499671",
+  appId: process.env.REACT_APP_FIREBASE_APP_ID || "1:812584499671:web:14516059d67a937ec47392",
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID || "G-5W2RWBEHLE",
 };
 
 try {
@@ -22,12 +29,12 @@ try {
   console.log("Firebase init error:", e);
 }
 
-// Gemini API configuration
-const apiKey = "AIzaSyAaiJHfFeKRrF8Wy5rqUCwhN2l3-EEi-2Q";
+// Gemini API configuration - SECURITY NOTE: Move to environment variable
+const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "AIzaSyAaiJHfFeKRrF8Wy5rqUCwhN2l3-EEi-2Q";
 const API_ENDPOINTS = [
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`,
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-latest:generateContent?key=${apiKey}`,
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`,
 ];
 
 export default function App() {
@@ -45,7 +52,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [settings, setSettings] = useState({
     fontSize: 16,
-    fontFamily: "Lexend, Arial, sans-serif",
+    fontFamily: "Libre Franklin, sans-serif",
     textAlign: "left",
     lineHeight: 1.5,
     letterSpacing: 0,
@@ -84,91 +91,90 @@ export default function App() {
   };
 
   const cleanHtmlResponse = (response) => {
-  if (!response) return "";
-  let cleanedResponse = response;
+    if (!response) return "";
+    let cleanedResponse = response;
 
-  // Remove HTML code block markers
-  cleanedResponse = cleanedResponse.replace(/```html/g, "");
-  cleanedResponse = cleanedResponse.replace(/```/g, "");
+    // Remove HTML code block markers
+    cleanedResponse = cleanedResponse.replace(/```html/g, "");
+    cleanedResponse = cleanedResponse.replace(/```/g, "");
 
-  // Remove quotes at start and end
-  while (
-    cleanedResponse.startsWith('"') ||
-    cleanedResponse.startsWith("'") ||
-    cleanedResponse.startsWith("`")
-  ) {
-    cleanedResponse = cleanedResponse.substring(1);
-  }
-  while (
-    cleanedResponse.endsWith('"') ||
-    cleanedResponse.endsWith("'") ||
-    cleanedResponse.endsWith("`")
-  ) {
-    cleanedResponse = cleanedResponse.substring(0, cleanedResponse.length - 1);
-  }
-
-  // Trim whitespace
-  cleanedResponse = cleanedResponse.trim();
-
-  // If still starts with backticks, remove first line
-  if (cleanedResponse.indexOf("```") !== -1) {
-    const lines = cleanedResponse.split("\n");
-    lines.shift(); // Remove first line
-    cleanedResponse = lines.join("\n");
-  }
-
-  return cleanedResponse;
-};
-
-const extractTextFromHtml = (htmlString) => {
-  const tempDiv = document.createElement("div");
-  tempDiv.innerHTML = htmlString;
-
-  const unwantedTags = [
-    "script",
-    "style",
-    "nav",
-    "header",
-    "footer",
-    "aside",
-    "noscript",
-    "iframe",
-    "object",
-    "embed"
-  ];
-  unwantedTags.forEach((tag) => {
-    const elements = tempDiv.getElementsByTagName(tag);
-    for (let i = elements.length - 1; i >= 0; i--) {
-      elements[i].remove();
+    // Remove quotes at start and end
+    while (
+      cleanedResponse.startsWith('"') ||
+      cleanedResponse.startsWith("'") ||
+      cleanedResponse.startsWith("`")
+    ) {
+      cleanedResponse = cleanedResponse.substring(1);
     }
-  });
-
-  let content = "";
-  const mainSelectors = [
-    "main",
-    "article",
-    "[role='main']",
-    ".content",
-    "#content",
-    ".post",
-    ".article",
-    ".entry-content"
-  ];
-
-  for (const selector of mainSelectors) {
-    const element = tempDiv.querySelector(selector);
-    if (element && element.textContent.trim().length > content.length) {
-      content = element.textContent.trim();
+    while (
+      cleanedResponse.endsWith('"') ||
+      cleanedResponse.endsWith("'") ||
+      cleanedResponse.endsWith("`")
+    ) {
+      cleanedResponse = cleanedResponse.substring(0, cleanedResponse.length - 1);
     }
-  }
 
-  if (!content || content.length < 100) {
-    content = tempDiv.textContent || tempDiv.innerText || "";
-  }
+    // Trim whitespace
+    cleanedResponse = cleanedResponse.trim();
 
-  return content.replace(/\s+/g, " ").trim();
-};
+    // If still starts with backticks, remove first line
+    if (cleanedResponse.indexOf("```") !== -1) {
+      const lines = cleanedResponse.split("\n");
+      lines.shift(); // Remove first line
+      cleanedResponse = lines.join("\n");
+    }
 
+    return cleanedResponse;
+  };
+
+  const extractTextFromHtml = (htmlString) => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = htmlString;
+
+    const unwantedTags = [
+      "script",
+      "style",
+      "nav",
+      "header",
+      "footer",
+      "aside",
+      "noscript",
+      "iframe",
+      "object",
+      "embed"
+    ];
+    unwantedTags.forEach((tag) => {
+      const elements = tempDiv.getElementsByTagName(tag);
+      for (let i = elements.length - 1; i >= 0; i--) {
+        elements[i].remove();
+      }
+    });
+
+    let content = "";
+    const mainSelectors = [
+      "main",
+      "article",
+      "[role='main']",
+      ".content",
+      "#content",
+      ".post",
+      ".article",
+      ".entry-content"
+    ];
+
+    for (const selector of mainSelectors) {
+      const element = tempDiv.querySelector(selector);
+      if (element && element.textContent.trim().length > content.length) {
+        content = element.textContent.trim();
+      }
+    }
+
+    if (!content || content.length < 100) {
+      content = tempDiv.textContent || tempDiv.innerText || "";
+    }
+
+    return content.replace(/\s+/g, " ").trim();
+  };
 
   const fetchUrlContent = async (url) => {
     try {
@@ -446,13 +452,11 @@ const extractTextFromHtml = (htmlString) => {
       <header className="header">
         <div className="logo-space">
           <img 
-            src="/logo-64.png" 
+            src="/Header-logo.png" 
             alt="Logo" 
             style={{
               width: '64px', 
               height: '64px',
-              borderRadius: '8px',
-              border: '2px solid #000000'
             }} 
           />
         </div>
@@ -556,7 +560,7 @@ const extractTextFromHtml = (htmlString) => {
             <div className="form-row">
               <label>Font Family</label>
               <select value={settings.fontFamily} onChange={(e) => setSettings({ ...settings, fontFamily: e.target.value })}>
-                <option>Lexend, Arial, sans-serif</option>
+                <option>Libre Franklin, sans-serif</option>
                 <option>Inter, Arial, sans-serif</option>
                 <option>OpenDyslexic, Arial, sans-serif</option>
               </select>
