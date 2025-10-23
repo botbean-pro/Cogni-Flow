@@ -40,6 +40,13 @@ const API_ENDPOINTS = [
 export default function App() {
   const [activeTab, setActiveTab] = useState("input");
   const [theme, setTheme] = useState("scheme1");
+<<<<<<< HEAD
+=======
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [animationComplete, setAnimationComplete] = useState(false);
+
+  // Inputs
+>>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
   const [textInput, setTextInput] = useState("");
   const [urlInput, setUrlInput] = useState("");
   const [fileInput, setFileInput] = useState(null);
@@ -67,6 +74,24 @@ export default function App() {
   const speechSentencesRef = useRef([]);
   const currentUtteranceRef = useRef(null);
 
+<<<<<<< HEAD
+=======
+  // Home page scroll animation
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const progress = Math.min(scrollTop / (window.innerHeight * 0.8), 1);
+      setScrollProgress(progress);
+      const bg = document.querySelector(".front-bg");
+      if (bg) bg.style.transform = `translateY(${scrollTop *0.4}px)`;
+      if (progress > 0.8 && !animationComplete) setAnimationComplete(true);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [animationComplete]);
+
+  // Load settings from localStorage
+>>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
   useEffect(() => {
     const saved = localStorage.getItem("cogniSet");
     if (saved) setSettings(JSON.parse(saved));
@@ -90,10 +115,12 @@ export default function App() {
     setShowError(true);
   };
 
+  // YOUR CLEAN HTML RESPONSE FUNCTION
   const cleanHtmlResponse = (response) => {
     if (!response) return "";
     let cleanedResponse = response;
 
+<<<<<<< HEAD
     // Remove HTML code block markers
     cleanedResponse = cleanedResponse.replace(/```html/g, "");
     cleanedResponse = cleanedResponse.replace(/```/g, "");
@@ -127,6 +154,43 @@ export default function App() {
     return cleanedResponse;
   };
 
+=======
+  // Remove HTML code block markers
+  cleanedResponse = cleanedResponse.replace(/```html/g, "");
+  cleanedResponse = cleanedResponse.replace(/```/g, "");
+
+  // Remove quotes at start and end
+  while (
+    cleanedResponse.startsWith('"') ||
+    cleanedResponse.startsWith("'") ||
+    cleanedResponse.startsWith("`")
+  ) {
+    cleanedResponse = cleanedResponse.substring(1);
+  }
+  while (
+    cleanedResponse.endsWith('"') ||
+    cleanedResponse.endsWith("'") ||
+    cleanedResponse.endsWith("`")
+  ) {
+    cleanedResponse = cleanedResponse.substring(0, cleanedResponse.length - 1);
+  }
+
+  // Trim whitespace
+  cleanedResponse = cleanedResponse.trim();
+
+  // If still starts with backticks, remove first line
+  if (cleanedResponse.indexOf("```") !== -1) {
+    const lines = cleanedResponse.split("\n");
+    lines.shift(); // Remove first line
+    cleanedResponse = lines.join("\n");
+  }
+
+  return cleanedResponse;
+};
+
+
+  // Extract text from HTML
+>>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
   const extractTextFromHtml = (htmlString) => {
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = htmlString;
@@ -223,6 +287,7 @@ export default function App() {
     throw new Error("Failed to fetch content from URL");
   };
 
+<<<<<<< HEAD
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -236,6 +301,13 @@ export default function App() {
       showErrorDialog("Failed to read file");
     };
     reader.readAsText(file);
+=======
+  // YOUR GENERATE CONTENT FROM GEMINI FUNCTION
+  const generateContentFromGemini = async (prompt) => {
+  const payload = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.7, topK: 40, topP: 0.95, maxOutputTokens: 8192 },
+>>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
   };
 
   const callGeminiAPI = async (endpoint, prompt) => {
@@ -261,6 +333,7 @@ export default function App() {
     setGenStatus("Processing input...");
     let sourceText = textInput;
     try {
+<<<<<<< HEAD
       if (urlInput && !sourceText) {
         setGenStatus("Fetching content from URL...");
         sourceText = await fetchUrlContent(urlInput);
@@ -269,6 +342,18 @@ export default function App() {
           return;
         }
         setTextInput(sourceText);
+=======
+      const response = await fetch(API_ENDPOINTS[i], {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const jsonResponse = await response.json();
+
+      if (!response.ok) {
+        if (i < API_ENDPOINTS.length - 1) continue;
+        throw new Error(jsonResponse.error?.message || "Unknown API error");
+>>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
       }
       if (!sourceText) {
         showErrorDialog("No valid content to process");
@@ -282,6 +367,7 @@ export default function App() {
         flashcard: `Create interactive flashcards in HTML format. Generate 10 cards with question on front and answer on back. Use CSS transforms for flip animation. Include navigation buttons and card counter: ${truncatedText}`
       };
 
+<<<<<<< HEAD
       for (const [type, prompt] of Object.entries(prompts)) {
         setGenStatus(`Generating ${type}...`);
         let success = false;
@@ -306,11 +392,43 @@ export default function App() {
       setGenStatus("All materials generated successfully!");
       setActiveTab("notes");
       setTimeout(() => setGenStatus(""), 3000);
+=======
+      // ✅ Proper optional chaining
+      const generatedText =
+        jsonResponse?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (generatedText) return cleanHtmlResponse(generatedText);
+
+      if (i < API_ENDPOINTS.length - 1) continue;
+      throw new Error("Invalid API response.");
+>>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
     } catch (error) {
       showErrorDialog("Failed to generate materials", error);
     } finally {
       setIsGenerating(false);
     }
+<<<<<<< HEAD
+=======
+  }
+  return "";
+};
+
+
+  // Content generators
+  const generateSmartNotes = async (inputText) => {
+    const prompt = `Create study notes from this content. Return ONLY clean HTML without markdown blocks, backticks, emojis, or code fences:
+${inputText}
+
+Structure:
+<h2>Title</h2>
+<h3>Section Heading</h3>
+<ul><li>Key point</li></ul>
+<strong>Important terms</strong>
+No emojis or special characters.
+Return clean HTML only.`;
+    const htmlContent = await generateContentFromGemini(prompt);
+    setNotesContent(htmlContent);
+>>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
   };
 
   const resetSpeechControls = () => {
@@ -329,11 +447,87 @@ export default function App() {
     return text.trim();
   };
 
+<<<<<<< HEAD
   const splitIntoSentences = (text) => {
     const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
     return sentences.map((s) => s.trim()).filter((s) => s.length > 0);
   };
 
+=======
+  // YOUR GENERATE FLASHCARDS FUNCTION
+ const generateFlashcards = async (inputText) => {
+  const prompt = `Create 8 flashcards from this content. Return ONLY clean HTML, no markdown fences, no emojis.
+Use this exact structure per card:
+<div class="flashcard">
+  <div class="card-inner">
+    <div class="card-face card-front"><p>QUESTION</p></div>
+    <div class="card-face card-back"><p>ANSWER</p></div>
+  </div>
+</div>
+Wrap all cards inside:
+<div class="flashcard-deck"> ...cards... </div>
+
+Content: ${inputText}`;
+  
+  const htmlContent = await generateContentFromGemini(prompt);
+  setFlashcardContent(htmlContent);
+};
+
+// ✅ Event handlers
+const handleFileChange = (e) => {
+  const file = e.target.files?.[0] || null;
+  setFileInput(file);
+};
+
+const handleGenerate = async () => {
+  setIsGenerating(true);
+  setGenStatus("Preparing your content...");
+  let processedText = textInput.trim();
+
+  try {
+    if (!processedText && urlInput && !fileInput) {
+      setGenStatus("Fetching content from URL...");
+      processedText = await fetchUrlContent(urlInput);
+      setGenStatus("URL content loaded!");
+    }
+
+    if (!processedText && fileInput) {
+      setGenStatus("Reading file...");
+      processedText = await fileInput.text();
+    }
+
+    if (!processedText) {
+      throw new Error("Please provide text, a URL, or a file.");
+    }
+
+    setGenStatus("Creating Smart Notes...");
+    await generateSmartNotes(processedText);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    setGenStatus("Building Mind Map...");
+    await generateMindMap(processedText);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    setGenStatus("Crafting Quiz...");
+    await generateQuiz(processedText);
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    setGenStatus("Designing Flashcards...");
+    await generateFlashcards(processedText);
+
+    setGenStatus("✅ All materials generated! Check the tabs above.");
+    setActiveTab("notes");
+  } catch (error) {
+    showErrorDialog("Generation failed", error);
+    setGenStatus("Error occurred.");
+  } finally {
+    setIsGenerating(false);
+  }
+};
+
+
+  // Speech synthesis functions
+>>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
   const initializeSpeech = () => {
     if (!notesContent) {
       showErrorDialog("No notes to read. Please generate content first.");
@@ -364,6 +558,19 @@ export default function App() {
     utterance.rate = speechSpeed;
     utterance.pitch = 1;
     utterance.volume = 1;
+<<<<<<< HEAD
+=======
+    
+    const selectedVoices = pickVoice();
+    if (selectedVoices && selectedVoices.length > 0)
+      utterance.voice = selectedVoices;
+
+    utterance.onstart = () => {
+      setIsPlaying(true);
+      setIsPaused(false);
+    };
+    
+>>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
     utterance.onend = () => {
       setCurrentSentenceIndex((prevIndex) => {
         const newIndex = prevIndex + 1;
@@ -439,6 +646,7 @@ export default function App() {
   };
 
   return (
+<<<<<<< HEAD
     <div className="App" data-theme={theme}>
       {/* Main Image Header - Replaces the logos */}
       <div className="main-image-header">
@@ -606,3 +814,260 @@ export default function App() {
     </div>
   );
 }
+=======
+    <div className="home-page">
+      <section className="front-section">
+  <div className="front-bg"></div>
+
+  <img
+    src="/Cogni-Flow-1.png"
+    alt="Cogni-Flow Logo 1"
+    className="logo-animated logo-top"
+    style={{
+      transform: `translate(-50%, ${-scrollProgress * 180}px)`,
+      opacity: Math.max(0, 1 - scrollProgress * 1.5),
+    }}
+  />
+
+  <img
+    src="/Cogni-Flow-2.png"
+    alt="Cogni-Flow Logo 2"
+    className="logo-animated logo-bottom-left"
+    style={{
+      transform: `translate(${-scrollProgress * 120}px, ${scrollProgress * 120}px)`,
+      opacity: Math.max(0, 1 - scrollProgress * 1.5),
+    }}
+  />
+
+  <img
+    src="/Cogni-Flow-3.png"
+    alt="Cogni-Flow Logo 3"
+    className="logo-animated logo-bottom-right"
+    style={{
+      transform: `translate(${scrollProgress * 120}px, ${scrollProgress * 120}px)`,
+      opacity: Math.max(0, 1 - scrollProgress * 1.5),
+    }}
+  />
+
+  <img
+    src="/Cogni-Flow-4.png"
+    alt="Cogni-Flow Logo 4"
+    className={`logo-animated logo-center ${animationComplete ? 'to-header' : ''}`}
+    style={
+      animationComplete || scrollProgress > 0.8
+        ? {
+            position: 'fixed',
+            top: '20px',
+            left: '40px',
+            transform: 'scale(0.60)',
+            zIndex: 10000,
+          }
+        : {
+            transform: `translate(-50%, -50%) scale(${1 - scrollProgress * 0.36})`,
+            opacity: Math.max(0, 1 - scrollProgress * 0.8),
+          }   
+          }
+          />
+          </section>
+
+      {/* Main App Content - APPEARS ON SCROLL */}
+      <div className="main-app-content" style={{ 
+        marginTop: '100vh',
+        background: 'white',
+        borderRadius: '40px 40px 0 0',
+        paddingTop: '60px',
+        boxShadow: '0 -20px 50px rgba(0,0,0,0.1)',
+        position: 'relative',
+        zIndex: 1000,
+        minHeight: '100vh'
+      }}>
+        <div className="App" data-theme={theme}>
+          <header className="header">
+            <div className="logo-section">
+              <div className="logo">
+                <img src="/Cogni-Flow-4.png" alt="Cogni-Flow Logo" />
+              </div>
+              <div className="title-area">
+                <h1>Cogni-Flow</h1>
+                <p className="subtitle">Your Digital Learning Companion</p>
+              </div>
+            </div>
+            <div className="right">
+              <button onClick={() => setShowSettings(true)} title="Settings">⚙️</button>
+              <button onClick={() => setTheme(theme === "scheme1" ? "scheme2" : "scheme1")} title="Switch Color Scheme">🎨</button>
+            </div>
+          </header>
+
+          <main>
+            <nav>
+              <button className={activeTab === "input" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("input")}>Input</button>
+              <button className={activeTab === "notes" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("notes")}>Smart Notes</button>
+              <button className={activeTab === "mindmap" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("mindmap")}>Mind Map</button>
+              <button className={activeTab === "quiz" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("quiz")}>Quiz</button>
+              <button className={activeTab === "flashcard" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("flashcard")}>Flashcards</button>
+            </nav>
+
+            {activeTab === "input" && (
+              <section className="tab-panel active">
+                <textarea
+                  value={textInput}
+                  onChange={(e) => setTextInput(e.target.value)}
+                  placeholder="Paste your text here and watch the magic happen! Upload a file or enter a link to get started..."
+                />
+                <input type="file" onChange={handleFileChange} accept=".txt,.md" />
+                <input
+                  type="url"
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  placeholder="Paste a public article link here"
+                />
+                <div className="center-btn">
+                  <button onClick={handleGenerate} disabled={isGenerating}>
+                    {isGenerating ? "Generating..." : "Generate Learning Materials"}
+                  </button>
+                </div>
+                <div id="genStatus">{genStatus}</div>
+              </section>
+            )}
+
+            {activeTab === "notes" && (
+              <section className="tab-panel">
+                <div className="speech-controls">
+                  <button onClick={handlePlay} className="speech-btn primary">
+                    {isPlaying && !isPaused ? "Stop" : isPaused ? "Resume" : "Read Aloud"}
+                  </button>
+                  <button onClick={handlePause} disabled={!isPlaying || isPaused} className="speech-btn">Pause</button>
+                  <button onClick={handleRewind} disabled={!isPlaying && !isPaused} className="speech-btn">Rewind</button>
+                  <button onClick={handleSkip} disabled={!isPlaying && !isPaused} className="speech-btn">Skip</button>
+                  <label htmlFor="speedSlider" className="ml-2">Speed</label>
+                  <input
+                    id="speedSlider"
+                    type="range"
+                    min="0.5"
+                    max="2"
+                    step="0.1"
+                    value={speechSpeed}
+                    onChange={(e) => onChangeSpeed(e.target.value)}
+                  />
+                  <span>{speechSpeed.toFixed(1)}x</span>
+                </div>
+                <div style={{ textAlign: settings.textAlign }} dangerouslySetInnerHTML={{ __html: notesContent }} />
+              </section>
+            )}
+
+            {activeTab === "mindmap" && (
+              <section className="tab-panel">
+                <div dangerouslySetInnerHTML={{ __html: mindmapContent }} />
+              </section>
+            )}
+
+            {activeTab === "quiz" && (
+              <section className="tab-panel">
+                <div dangerouslySetInnerHTML={{ __html: quizContent }} />
+              </section>
+            )}
+
+            {activeTab === "flashcard" && (
+              <section className="tab-panel">
+                <div
+                  className="flashcard-host"
+                  onClick={(e) => {
+                    const card = e.target.closest(".flashcard");
+                    if (card) card.classList.toggle("flipped");
+                  }}
+                  dangerouslySetInnerHTML={{ __html: flashcardContent }}
+                />
+              </section>
+            )}
+          </main>
+
+          {showSettings && (
+            <div className="modal-bg" onClick={() => setShowSettings(false)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <h2>Settings</h2>
+                <div className="form-row">
+                  <label>Font Size</label>
+                  <input
+                    type="range"
+                    min="12"
+                    max="24"
+                    value={settings.fontSize}
+                    onChange={(e) => setSettings({ ...settings, fontSize: parseInt(e.target.value) })}
+                  />
+                </div>
+                <div className="form-row">
+                  <label>Font Family</label>
+                  <select
+                    value={settings.fontFamily}
+                    onChange={(e) => setSettings({ ...settings, fontFamily: e.target.value })}
+                  >
+                    <option>Lexend, Arial, sans-serif</option>
+                    <option>Inter, Arial, sans-serif</option>
+                    <option>OpenDyslexic, Arial, sans-serif</option>
+                  </select>
+                </div>
+                <div className="form-row">
+                  <label>Text Align</label>
+                  <select
+                    value={settings.textAlign}
+                    onChange={(e) => setSettings({ ...settings, textAlign: e.target.value })}
+                  >
+                    <option value="left">Left</option>
+                    <option value="justify">Justify</option>
+                    <option value="center">Center</option>
+                  </select>
+                </div>
+                <div className="form-row">
+                  <label>Line Height</label>
+                  <input
+                    type="range"
+                    min="1.2"
+                    max="2.5"
+                    step="0.1"
+                    value={settings.lineHeight}
+                    onChange={(e) => setSettings({ ...settings, lineHeight: parseFloat(e.target.value) })}
+                  />
+                </div>
+                <div className="form-row">
+                  <label>Letter Spacing</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="3"
+                    step="0.1"
+                    value={settings.letterSpacing}
+                    onChange={(e) => setSettings({ ...settings, letterSpacing: parseFloat(e.target.value) })}
+                  />
+                </div>
+                <div className="form-row">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={settings.bionic}
+                      onChange={(e) => setSettings({ ...settings, bionic: e.target.checked })}
+                    />
+                    Bionic Reading
+                  </label>
+                </div>
+                <div className="actions">
+                  <button onClick={() => setShowSettings(false)}>Close</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showError && (
+            <div className="modal-bg" onClick={() => setShowError(false)}>
+              <div className="modal" onClick={(e) => e.stopPropagation()}>
+                <h2 style={{ color: "var(--color-red-500)" }}>Error</h2>
+                <p className="mb-4">{errorMessage}</p>
+                <button onClick={() => setShowError(false)}>Got It!</button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+>>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
