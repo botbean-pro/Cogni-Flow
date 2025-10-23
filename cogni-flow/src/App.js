@@ -31,31 +31,17 @@ const API_ENDPOINTS = [
 ];
 
 export default function App() {
-  // UI state
   const [activeTab, setActiveTab] = useState("input");
   const [theme, setTheme] = useState("scheme1");
-
-  // NEW: Home page state
-  const [showHomePage, setShowHomePage] = useState(true);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [animationComplete, setAnimationComplete] = useState(false);
-
-  // Inputs
   const [textInput, setTextInput] = useState("");
   const [urlInput, setUrlInput] = useState("");
   const [fileInput, setFileInput] = useState(null);
-
-  // Generation
   const [isGenerating, setIsGenerating] = useState(false);
   const [genStatus, setGenStatus] = useState("");
-
-  // Outputs
   const [notesContent, setNotesContent] = useState("");
   const [mindmapContent, setMindmapContent] = useState("");
   const [quizContent, setQuizContent] = useState("");
   const [flashcardContent, setFlashcardContent] = useState("");
-
-  // Settings modal
   const [showSettings, setShowSettings] = useState(false);
   const [settings, setSettings] = useState({
     fontSize: 16,
@@ -65,12 +51,8 @@ export default function App() {
     letterSpacing: 0,
     bionic: false,
   });
-
-  // Error modal
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
-  // Speech state/refs
   const [speechSpeed, setSpeechSpeed] = useState(1);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
@@ -78,27 +60,11 @@ export default function App() {
   const speechSentencesRef = useRef([]);
   const currentUtteranceRef = useRef(null);
 
-  // NEW: Home page scroll animation
-  useEffect(() => {
-    if (!showHomePage) return;
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const documentHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progress = Math.min(scrollTop / (documentHeight * 0.65), 1);
-      setScrollProgress(progress);
-      if (progress > 0.80 && !animationComplete) setAnimationComplete(true);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [showHomePage, animationComplete]);
-
-  // Load settings from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("cogniSet");
     if (saved) setSettings(JSON.parse(saved));
   }, []);
 
-  // Apply settings
   useEffect(() => {
     document.body.style.fontSize = `${settings.fontSize}px`;
     document.body.style.fontFamily = settings.fontFamily;
@@ -107,12 +73,10 @@ export default function App() {
     localStorage.setItem("cogniSet", JSON.stringify(settings));
   }, [settings]);
 
-  // Theme application
   useEffect(() => {
     document.body.setAttribute("data-theme", theme);
   }, [theme]);
 
-  // Helper functions
   const showErrorDialog = (msg, err) => {
     console.error(msg, err || "");
     setErrorMessage(msg + (err?.message ? `: ${err.message}` : ""));
@@ -123,17 +87,15 @@ export default function App() {
   if (!response) return "";
   let cleanedResponse = response;
 
-
   // Remove HTML code block markers
   cleanedResponse = cleanedResponse.replace(/```html/g, "");
   cleanedResponse = cleanedResponse.replace(/```/g, "");
-
 
   // Remove quotes at start and end
   while (
     cleanedResponse.startsWith('"') ||
     cleanedResponse.startsWith("'") ||
-    cleanedResponse.startsWith("`")
+    cleanedResponse.startsWith("`")
   ) {
     cleanedResponse = cleanedResponse.substring(1);
   }
@@ -145,34 +107,69 @@ export default function App() {
     cleanedResponse = cleanedResponse.substring(0, cleanedResponse.length - 1);
   }
 
-  // Extract text from HTML
-  const extractTextFromHtml = (htmlString) => {
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = htmlString;
+  // Trim whitespace
+  cleanedResponse = cleanedResponse.trim();
 
-    const unwantedTags = ["script", "style", "nav", "header", "footer", "aside", "noscript", "iframe", "object", "embed"];
-    unwantedTags.forEach((tag) => {
-      const elements = tempDiv.getElementsByTagName(tag);
-      for (let i = elements.length - 1; i >= 0; i--) {
-        elements[i].remove();
-      }
-    });
+  // If still starts with backticks, remove first line
+  if (cleanedResponse.indexOf("```") !== -1) {
+    const lines = cleanedResponse.split("\n");
+    lines.shift(); // Remove first line
+    cleanedResponse = lines.join("\n");
+  }
 
-    let content = "";
-    const mainSelectors = ["main", "article", "[role='main']", ".content", "#content", ".post", ".article", ".entry-content"];
-    for (const selector of mainSelectors) {
-      const element = tempDiv.querySelector(selector);
-      if (element && element.textContent.trim().length > content.length) {
-        content = element.textContent.trim();
-      }
+  return cleanedResponse;
+};
+
+const extractTextFromHtml = (htmlString) => {
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = htmlString;
+
+  const unwantedTags = [
+    "script",
+    "style",
+    "nav",
+    "header",
+    "footer",
+    "aside",
+    "noscript",
+    "iframe",
+    "object",
+    "embed"
+  ];
+  unwantedTags.forEach((tag) => {
+    const elements = tempDiv.getElementsByTagName(tag);
+    for (let i = elements.length - 1; i >= 0; i--) {
+      elements[i].remove();
     }
-    if (!content || content.length < 100) {
-      content = tempDiv.textContent || tempDiv.innerText || "";
-    }
-    return content.replace(/\s+/g, " ").trim();
-  };
+  });
 
-  // Fetch URL content with CORS proxy fallbacks
+  let content = "";
+  const mainSelectors = [
+    "main",
+    "article",
+    "[role='main']",
+    ".content",
+    "#content",
+    ".post",
+    ".article",
+    ".entry-content"
+  ];
+
+  for (const selector of mainSelectors) {
+    const element = tempDiv.querySelector(selector);
+    if (element && element.textContent.trim().length > content.length) {
+      content = element.textContent.trim();
+    }
+  }
+
+  if (!content || content.length < 100) {
+    content = tempDiv.textContent || tempDiv.innerText || "";
+  }
+
+  return content.replace(/\s+/g, " ").trim();
+};
+
+
   const fetchUrlContent = async (url) => {
     try {
       const directResponse = await fetch(url, {
@@ -190,7 +187,6 @@ export default function App() {
     } catch (error) {
       console.log("Direct fetch failed:", error);
     }
-
     const proxies = ["https://api.allorigins.win/get?url=", "https://thingproxy.freeboard.io/fetch/"];
     for (const proxy of proxies) {
       try {
@@ -203,7 +199,6 @@ export default function App() {
           },
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        
         let responseData;
         if (proxy.includes("allorigins")) {
           const jsonResponse = await response.json();
@@ -211,7 +206,6 @@ export default function App() {
         } else {
           responseData = await response.text();
         }
-        
         if (responseData) {
           const extractedContent = extractTextFromHtml(responseData);
           if (extractedContent && extractedContent.length > 50) return extractedContent;
@@ -220,222 +214,171 @@ export default function App() {
         console.log(`Proxy ${proxy} failed:`, error);
       }
     }
-    throw new Error("Unable to fetch URL content due to CORS. Please copy-paste the article text into the textarea.");
+    throw new Error("Failed to fetch content from URL");
   };
 
-  // Generate content using Gemini API
-  const generateContentFromGemini = async (prompt) => {
-  const payload = {
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: {
-      temperature: 0.7,
-      topK: 40,
-      topP: 0.95,
-      maxOutputTokens: 8192,
-    },
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setFileInput(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target.result;
+      setTextInput(content);
+    };
+    reader.onerror = () => {
+      showErrorDialog("Failed to read file");
+    };
+    reader.readAsText(file);
   };
 
-  for (let i = 0; i < API_ENDPOINTS.length; i++) {
+  const callGeminiAPI = async (endpoint, prompt) => {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.25, maxOutputTokens: 8192 },
+      }),
+    });
+    if (!response.ok) throw new Error(`API failed: ${response.status}`);
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+  };
+
+  const handleGenerate = async () => {
+    if (!textInput && !urlInput) {
+      showErrorDialog("Please provide text, a file, or a URL");
+      return;
+    }
+    setIsGenerating(true);
+    setGenStatus("Processing input...");
+    let sourceText = textInput;
     try {
-      const response = await fetch(API_ENDPOINTS[i], {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const jsonResponse = await response.json();
-
-      if (!response.ok) {
-        if (i < API_ENDPOINTS.length - 1) continue;
-        throw new Error(jsonResponse.error?.message || "Unknown API error");
+      if (urlInput && !sourceText) {
+        setGenStatus("Fetching content from URL...");
+        sourceText = await fetchUrlContent(urlInput);
+        if (!sourceText) {
+          showErrorDialog("Could not extract content from the URL");
+          return;
+        }
+        setTextInput(sourceText);
       }
+      if (!sourceText) {
+        showErrorDialog("No valid content to process");
+        return;
+      }
+      const truncatedText = sourceText.substring(0, 30000);
+      const prompts = {
+        notes: `Convert this content into comprehensive, well-structured study notes in HTML format. Use semantic HTML5 elements, headings (h2, h3, h4), lists (ul/ol), and paragraphs. Include <strong> for emphasis, <mark> for highlights, and <blockquote> for important concepts. Make it educational and easy to scan: ${truncatedText}`,
+        mindmap: `Create an interactive, colorful mind map HTML visualization of this content. Use nested divs with CSS for styling. Center the main topic, branch out key concepts, and include sub-branches for details. Use colors, borders, and padding to create visual hierarchy: ${truncatedText}`,
+        quiz: `Generate an interactive quiz in HTML format with 10 multiple-choice questions based on this content. Include radio buttons, a submit button, and JavaScript for scoring. Show correct answers on submission with explanations: ${truncatedText}`,
+        flashcard: `Create interactive flashcards in HTML format. Generate 10 cards with question on front and answer on back. Use CSS transforms for flip animation. Include navigation buttons and card counter: ${truncatedText}`
+      };
 
-      // ✅ Fix: Properly navigate the response structure
-      const generatedText =
-        jsonResponse?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (generatedText) return cleanHtmlResponse(generatedText);
-
-      if (i < API_ENDPOINTS.length - 1) continue;
-      throw new Error("Invalid API response.");
+      for (const [type, prompt] of Object.entries(prompts)) {
+        setGenStatus(`Generating ${type}...`);
+        let success = false;
+        for (const endpoint of API_ENDPOINTS) {
+          try {
+            const response = await callGeminiAPI(endpoint, prompt);
+            const cleanedResponse = cleanHtmlResponse(response);
+            switch (type) {
+              case "notes": setNotesContent(cleanedResponse); break;
+              case "mindmap": setMindmapContent(cleanedResponse); break;
+              case "quiz": setQuizContent(cleanedResponse); break;
+              case "flashcard": setFlashcardContent(cleanedResponse); break;
+            }
+            success = true;
+            break;
+          } catch (error) {
+            console.log(`Endpoint failed: ${endpoint}`, error);
+          }
+        }
+        if (!success) throw new Error(`Failed to generate ${type} with all endpoints`);
+      }
+      setGenStatus("All materials generated successfully!");
+      setActiveTab("notes");
+      setTimeout(() => setGenStatus(""), 3000);
     } catch (error) {
-      if (i === API_ENDPOINTS.length - 1) throw error;
+      showErrorDialog("Failed to generate materials", error);
+    } finally {
+      setIsGenerating(false);
     }
-  }
-
-  return "";
-};
-
-
-  // Content generators
-  const generateSmartNotes = async (inputText) => {
-    const prompt = `Create study notes from this content. Return ONLY clean HTML without markdown blocks, backticks, emojis, or code fences:
-${inputText}
-
-Structure:
-<h2>Title</h2>
-<h3>Section Heading</h3>
-<ul><li>Key point</li></ul>
-<strong>Important terms</strong>
-No emojis or special characters.
-Return clean HTML only.`;
-    const htmlContent = await generateContentFromGemini(prompt);
-    setNotesContent(htmlContent);
   };
 
-  const generateMindMap = async (inputText) => {
-    const prompt = `Create a mind map from this content. Return ONLY clean HTML, no markdown fences, no emojis. Short sub-points (<= 8 words).
-Use exact structure:
-<h2>MAIN TOPIC</h2>
-<ul>
-  <li>BRANCH 1 - Short Title
-    <ul>
-      <li>Short sub-point 1</li>
-      <li>Short sub-point 2</li>
-      <li>Short sub-point 3</li>
-    </ul>
-  </li>
-</ul>
-
-Content: ${inputText}`;
-    const htmlContent = await generateContentFromGemini(prompt);
-    setMindmapContent(htmlContent);
+  const resetSpeechControls = () => {
+    window.speechSynthesis.cancel();
+    setIsPlaying(false);
+    setIsPaused(false);
+    setCurrentSentenceIndex(0);
+    speechSentencesRef.current = [];
+    currentUtteranceRef.current = null;
   };
 
-  const generateQuiz = async (inputText) => {
-    const prompt = `Create a quiz from this content. Return ONLY clean HTML, no markdown fences, no emojis.
-Structure:
-<h2>Quiz Time!</h2>
-<div class="q">Question text</div>
-<ul>
-  <li>A) Option A</li>
-  <li>B) Option B</li>
-  <li>C) Option C</li>
-  <li>D) Option D</li>
-</ul>
-<div class="answer" style="display:none">Correct: A) Option A</div>
-
-Content: ${inputText}`;
-    const htmlContent = await generateContentFromGemini(prompt);
-    setQuizContent(htmlContent);
+  const extractTextFromContent = (htmlContent) => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = htmlContent;
+    const text = tempDiv.textContent || tempDiv.innerText || "";
+    return text.trim();
   };
 
-  const generateFlashcards = async (inputText) => {
-  const prompt = `Create 8 flashcards from this content. Return ONLY clean HTML, no markdown fences, no emojis.
-Use this exact structure per card:
-<div class="flashcard">
-  <div class="card-inner">
-    <div class="card-face card-front"><p>QUESTION</p></div>
-    <div class="card-face card-back"><p>ANSWER</p></div>
-  </div>
-</div>
-Wrap all cards inside:
-<div class="flashcard-deck"> ...cards... </div>
+  const splitIntoSentences = (text) => {
+    const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+    return sentences.map((s) => s.trim()).filter((s) => s.length > 0);
+  };
 
-Content:
-${inputText}`;
-
-  try {
-    const htmlContent = await generateContentFromGemini(prompt);
-    if (!htmlContent || !htmlContent.includes("flashcard-deck")) {
-      throw new Error("Invalid flashcard HTML returned.");
-    }
-    setFlashcardContent(htmlContent);
-  } catch (error) {
-    showErrorDialog("Failed to generate flashcards", error);
-  }
-};
-
-
-  // Speech synthesis functions
   const initializeSpeech = () => {
-    const tempElement = document.createElement("div");
-    tempElement.innerHTML = notesContent || "";
-    const textContent = tempElement.textContent || tempElement.innerText || "";
-    const cleanedText = textContent.replace(/\s+/g, " ").trim();
-    
-    if (!cleanedText) {
-      showErrorDialog("No content to read. Generate some notes first!");
+    if (!notesContent) {
+      showErrorDialog("No notes to read. Please generate content first.");
       return false;
     }
-    
-    speechSentencesRef.current = cleanedText.split(/[.!?]+/).map((sentence) => sentence.trim()).filter(Boolean);
-    setCurrentSentenceIndex(0);
+    const textToSpeak = extractTextFromContent(notesContent);
+    if (!textToSpeak) {
+      showErrorDialog("No readable text found in notes.");
+      return false;
+    }
+    const sentences = splitIntoSentences(textToSpeak);
+    if (sentences.length === 0) {
+      showErrorDialog("Could not parse text into sentences.");
+      return false;
+    }
+    speechSentencesRef.current = sentences;
     return true;
   };
 
-  const pickVoice = () => {
-    const voices = window.speechSynthesis.getVoices();
-    const preferredVoices = voices.filter(
-      (voice) =>
-        voice.lang?.startsWith("en") &&
-        (voice.name.includes("Natural") ||
-          voice.name.includes("Premium") ||
-          voice.name.includes("Enhanced") ||
-          voice.name.includes("Google") ||
-          voice.name.includes("Microsoft"))
-    );
-    if (preferredVoices.length) return preferredVoices;
-    
-    const englishVoices = voices.filter((voice) => voice.lang?.startsWith("en"));
-    return englishVoices || null;
-  };
-
   const speakCurrentSentence = () => {
-    const sentenceIndex = currentSentenceIndex;
     const sentences = speechSentencesRef.current;
-    
-    if (!sentences || sentenceIndex >= sentences.length) {
+    const index = currentSentenceIndex;
+    if (index >= sentences.length) {
       resetSpeechControls();
       return;
     }
-    
-    const sentence = sentences[sentenceIndex];
-    if (!sentence) {
-      setCurrentSentenceIndex((prevIndex) => prevIndex + 1);
-      setTimeout(speakCurrentSentence, 50);
-      return;
-    }
-    
-    const utterance = new SpeechSynthesisUtterance(sentence);
+    const utterance = new SpeechSynthesisUtterance(sentences[index]);
     utterance.rate = speechSpeed;
     utterance.pitch = 1;
     utterance.volume = 1;
-    
-    const selectedVoice = pickVoice();
-    if (selectedVoice) utterance.voice = selectedVoice;
-
-    utterance.onstart = () => {
-      setIsPlaying(true);
-      setIsPaused(false);
-    };
-    
     utterance.onend = () => {
-      setCurrentSentenceIndex((prevIndex) => prevIndex + 1);
-      const nextIndex = sentenceIndex + 1;
-      if (nextIndex < sentences.length && !isPaused) {
-        setTimeout(speakCurrentSentence, 150);
-      } else {
-        resetSpeechControls();
-      }
+      setCurrentSentenceIndex((prevIndex) => {
+        const newIndex = prevIndex + 1;
+        if (newIndex < sentences.length) {
+          setTimeout(speakCurrentSentence, 100);
+        } else {
+          resetSpeechControls();
+        }
+        return newIndex;
+      });
     };
-    
-    utterance.onerror = () => resetSpeechControls();
-
+    utterance.onerror = (event) => {
+      console.error("Speech error:", event);
+      resetSpeechControls();
+    };
     currentUtteranceRef.current = utterance;
     window.speechSynthesis.speak(utterance);
   };
 
-  const resetSpeechControls = () => {
-    setIsPlaying(false);
-    setIsPaused(false);
-    currentUtteranceRef.current = null;
-  };
-
-  // Speech control handlers
   const handlePlay = () => {
     if (isPlaying && !isPaused) {
-      window.speechSynthesis.cancel();
       resetSpeechControls();
       return;
     }
@@ -489,284 +432,29 @@ ${inputText}`;
     setActiveTab(tab);
   };
 
-  if (showHomePage) {
-    return (
-      <div className="home-page">
-        {/* White background fill */}
-        <div className="white-bg-fill"></div>
-        
-        <img 
-          src="/Cogni-Flow-1.png" 
-          alt="Cogni-Flow Logo 1"
-          className="logo-animated logo-top"
-          style={{
-            transform: `translate(-50%, ${-scrollProgress * 180}px)`,
-            opacity: 1 - scrollProgress * 1.12
-          }}
-        />
-        <img 
-          src="/Cogni-Flow-2.png" 
-          alt="Cogni-Flow Logo 2"
-          className="logo-animated logo-bottom-left"
-          style={{
-            transform: `translate(${-scrollProgress * 120}px, ${scrollProgress * 120}px)`,
-            opacity: 1 - scrollProgress * 1.2
-          }}
-        />
-        <img 
-          src="/Cogni-Flow-3.png" 
-          alt="Cogni-Flow Logo 3"
-          className="logo-animated logo-bottom-right"
-          style={{
-            transform: `translate(${scrollProgress * 120}px, ${scrollProgress * 120}px)`,
-            opacity: 1 - scrollProgress * 1.2
-          }}
-        />
-        <img 
-          src="/Cogni-Flow-4.png" 
-          alt="Cogni-Flow Logo 4"
-          className={`logo-animated logo-center ${animationComplete ? 'to-header' : ''}`}
-          style={animationComplete ? {
-            position: 'fixed',
-            top: '20px',
-            left: '40px',
-            transform: 'scale(0.60)',
-            zIndex: 10000
-          } : {
-            transform: `translate(-50%, -50%) scale(${1 - scrollProgress * 0.36})`,
-            opacity: 1 - scrollProgress * 0.19
-          }}
-        />
-
-        <div className="hero-section">
-          <div className="hero-content">
-            <h1 className="hero-title">Welcome to Cogni-Flow</h1>
-            <p className="hero-subtitle">Where every learner finds their flow</p>
-            {animationComplete && (
-              <button 
-                className="enter-app-btn"
-                onClick={() => setShowHomePage(false)}
-              >
-                Enter App
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Main App Content - Scrollable below hero */}
-        <div className="main-app-content" style={{ 
-          position: 'relative',
-          background: 'black',
-          minHeight: '100vh',
-          zIndex: 1000,
-          marginTop: '100vh'
-        }}>
-          <div className="App" data-theme={theme} style={{ 
-            background: 'black',
-            color: 'white',
-            minHeight: '100vh'
-          }}>
-            <header className="header" style={{ background: 'black', color: 'white' }}>
-              <div className="logo-section">
-                <div className="logo">
-                  <img src="/Cogni-Flow-4.png" alt="Cogni-Flow Logo" />
-                </div>
-                <div className="title-area">
-                  <h1 style={{ color: 'white' }}>Cogni-Flow</h1>
-                  <p className="subtitle" style={{ color: 'white' }}>Your Digital Learning Companion</p>
-                </div>
-              </div>
-              <div className="right">
-                <button onClick={() => setShowSettings(true)} title="Settings">⚙️</button>
-                <button onClick={() => setTheme(theme === "scheme1" ? "scheme2" : "scheme1")} title="Switch Color Scheme">🎨</button>
-              </div>
-            </header>
-
-            <main>
-              <nav>
-                <button className={activeTab === "input" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("input")}>Input</button>
-                <button className={activeTab === "notes" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("notes")}>Smart Notes</button>
-                <button className={activeTab === "mindmap" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("mindmap")}>Mind Map</button>
-                <button className={activeTab === "quiz" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("quiz")}>Quiz</button>
-                <button className={activeTab === "flashcard" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("flashcard")}>Flashcards</button>
-              </nav>
-
-              {activeTab === "input" && (
-                <section className="tab-panel active">
-                  <textarea
-                    value={textInput}
-                    onChange={(e) => setTextInput(e.target.value)}
-                    placeholder="Paste your text here and watch the magic happen! Upload a file or enter a link to get started..."
-                  />
-                  <input type="file" onChange={handleFileChange} accept=".txt,.md" />
-                  <input
-                    type="url"
-                    value={urlInput}
-                    onChange={(e) => setUrlInput(e.target.value)}
-                    placeholder="Paste a public article link here"
-                  />
-                  <div className="center-btn">
-                    <button onClick={handleGenerate} disabled={isGenerating}>
-                      {isGenerating ? "Generating..." : "Generate Learning Materials"}
-                    </button>
-                  </div>
-                  <div id="genStatus">{genStatus}</div>
-                </section>
-              )}
-
-              {activeTab === "notes" && (
-                <section className="tab-panel">
-                  <div className="speech-controls">
-                    <button onClick={handlePlay} className="speech-btn primary">
-                      {isPlaying && !isPaused ? "Stop" : isPaused ? "Resume" : "Read Aloud"}
-                    </button>
-                    <button onClick={handlePause} disabled={!isPlaying || isPaused} className="speech-btn">Pause</button>
-                    <button onClick={handleRewind} disabled={!isPlaying && !isPaused} className="speech-btn">Rewind</button>
-                    <button onClick={handleSkip} disabled={!isPlaying && !isPaused} className="speech-btn">Skip</button>
-                    <label htmlFor="speedSlider" className="ml-2">Speed</label>
-                    <input
-                      id="speedSlider"
-                      type="range"
-                      min="0.5"
-                      max="2"
-                      step="0.1"
-                      value={speechSpeed}
-                      onChange={(e) => onChangeSpeed(e.target.value)}
-                    />
-                    <span>{speechSpeed.toFixed(1)}x</span>
-                  </div>
-                  <div style={{ textAlign: settings.textAlign }} dangerouslySetInnerHTML={{ __html: notesContent }} />
-                </section>
-              )}
-
-              {activeTab === "mindmap" && (
-                <section className="tab-panel">
-                  <div dangerouslySetInnerHTML={{ __html: mindmapContent }} />
-                </section>
-              )}
-
-              {activeTab === "quiz" && (
-                <section className="tab-panel">
-                  <div dangerouslySetInnerHTML={{ __html: quizContent }} />
-                </section>
-              )}
-
-              {activeTab === "flashcard" && (
-                <section className="tab-panel">
-                  <div
-                    className="flashcard-host"
-                    onClick={(e) => {
-                      const card = e.target.closest(".flashcard");
-                      if (card) card.classList.toggle("flipped");
-                    }}
-                    dangerouslySetInnerHTML={{ __html: flashcardContent }}
-                  />
-                </section>
-              )}
-            </main>
-
-            {showSettings && (
-              <div className="modal-bg" onClick={() => setShowSettings(false)}>
-                <div className="modal" onClick={(e) => e.stopPropagation()}>
-                  <h2>Settings</h2>
-                  <div className="form-row">
-                    <label>Font Size</label>
-                    <input
-                      type="range"
-                      min="12"
-                      max="24"
-                      value={settings.fontSize}
-                      onChange={(e) => setSettings({ ...settings, fontSize: parseInt(e.target.value) })}
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label>Font Family</label>
-                    <select
-                      value={settings.fontFamily}
-                      onChange={(e) => setSettings({ ...settings, fontFamily: e.target.value })}
-                    >
-                      <option>Lexend, Arial, sans-serif</option>
-                      <option>Inter, Arial, sans-serif</option>
-                      <option>OpenDyslexic, Arial, sans-serif</option>
-                    </select>
-                  </div>
-                  <div className="form-row">
-                    <label>Text Align</label>
-                    <select
-                      value={settings.textAlign}
-                      onChange={(e) => setSettings({ ...settings, textAlign: e.target.value })}
-                    >
-                      <option value="left">Left</option>
-                      <option value="justify">Justify</option>
-                      <option value="center">Center</option>
-                    </select>
-                  </div>
-                  <div className="form-row">
-                    <label>Line Height</label>
-                    <input
-                      type="range"
-                      min="1.2"
-                      max="2.5"
-                      step="0.1"
-                      value={settings.lineHeight}
-                      onChange={(e) => setSettings({ ...settings, lineHeight: parseFloat(e.target.value) })}
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label>Letter Spacing</label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="3"
-                      step="0.1"
-                      value={settings.letterSpacing}
-                      onChange={(e) => setSettings({ ...settings, letterSpacing: parseFloat(e.target.value) })}
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={settings.bionic}
-                        onChange={(e) => setSettings({ ...settings, bionic: e.target.checked })}
-                      />
-                      Bionic Reading
-                    </label>
-                  </div>
-                  <div className="actions">
-                    <button onClick={() => setShowSettings(false)}>Close</button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {showError && (
-              <div className="modal-bg" onClick={() => setShowError(false)}>
-                <div className="modal" onClick={(e) => e.stopPropagation()}>
-                  <h2 style={{ color: "var(--accent4)" }}>Error</h2>
-                  <p className="mb-4">{errorMessage}</p>
-                  <button onClick={() => setShowError(false)}>Got It!</button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Original App Content (when Enter App is clicked)
   return (
     <div className="App" data-theme={theme}>
+      {/* Main Image Header - Replaces the logos */}
+      <div className="main-image-header">
+        <img 
+          src="/Main-Image.png" 
+          alt="Cogni-Flow Main Visual" 
+          className="main-header-image" 
+        />
+      </div>
+
       <header className="header">
-        <div className="logo-section">
-          <div className="logo">
-            <img src="/Cogni-Flow-4.png" alt="Cogni-Flow Logo" />
-          </div>
-          <div className="title-area">
-            <h1>Cogni-Flow</h1>
-            <p className="subtitle">Your Digital Learning Companion</p>
-          </div>
+        <div className="logo-space">
+          <img 
+            src="/logo-64.png" 
+            alt="Logo" 
+            style={{
+              width: '64px', 
+              height: '64px',
+              borderRadius: '8px',
+              border: '2px solid #000000'
+            }} 
+          />
         </div>
         <div className="right">
           <button onClick={() => setShowSettings(true)} title="Settings">⚙️</button>
@@ -776,11 +464,11 @@ ${inputText}`;
 
       <main>
         <nav>
-          <button className={activeTab === "input" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("input")}>Input</button>
-          <button className={activeTab === "notes" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("notes")}>Smart Notes</button>
-          <button className={activeTab === "mindmap" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("mindmap")}>Mind Map</button>
-          <button className={activeTab === "quiz" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("quiz")}>Quiz</button>
-          <button className={activeTab === "flashcard" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("flashcard")}>Flashcards</button>
+          <button className={activeTab === "input" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("input")}>📝 Input</button>
+          <button className={activeTab === "notes" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("notes")}>📚 Smart Notes</button>
+          <button className={activeTab === "mindmap" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("mindmap")}>🧠 Mind Map</button>
+          <button className={activeTab === "quiz" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("quiz")}>❓ Quiz</button>
+          <button className={activeTab === "flashcard" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("flashcard")}>🎴 Flashcards</button>
         </nav>
 
         {activeTab === "input" && (
@@ -863,20 +551,11 @@ ${inputText}`;
             <h2>Settings</h2>
             <div className="form-row">
               <label>Font Size</label>
-              <input
-                type="range"
-                min="12"
-                max="24"
-                value={settings.fontSize}
-                onChange={(e) => setSettings({ ...settings, fontSize: parseInt(e.target.value) })}
-              />
+              <input type="range" min="12" max="24" value={settings.fontSize} onChange={(e) => setSettings({ ...settings, fontSize: parseInt(e.target.value) })} />
             </div>
             <div className="form-row">
               <label>Font Family</label>
-              <select
-                value={settings.fontFamily}
-                onChange={(e) => setSettings({ ...settings, fontFamily: e.target.value })}
-              >
+              <select value={settings.fontFamily} onChange={(e) => setSettings({ ...settings, fontFamily: e.target.value })}>
                 <option>Lexend, Arial, sans-serif</option>
                 <option>Inter, Arial, sans-serif</option>
                 <option>OpenDyslexic, Arial, sans-serif</option>
@@ -884,10 +563,7 @@ ${inputText}`;
             </div>
             <div className="form-row">
               <label>Text Align</label>
-              <select
-                value={settings.textAlign}
-                onChange={(e) => setSettings({ ...settings, textAlign: e.target.value })}
-              >
+              <select value={settings.textAlign} onChange={(e) => setSettings({ ...settings, textAlign: e.target.value })}>
                 <option value="left">Left</option>
                 <option value="justify">Justify</option>
                 <option value="center">Center</option>
@@ -895,33 +571,15 @@ ${inputText}`;
             </div>
             <div className="form-row">
               <label>Line Height</label>
-              <input
-                type="range"
-                min="1.2"
-                max="2.5"
-                step="0.1"
-                value={settings.lineHeight}
-                onChange={(e) => setSettings({ ...settings, lineHeight: parseFloat(e.target.value) })}
-              />
+              <input type="range" min="1.2" max="2.5" step="0.1" value={settings.lineHeight} onChange={(e) => setSettings({ ...settings, lineHeight: parseFloat(e.target.value) })} />
             </div>
             <div className="form-row">
               <label>Letter Spacing</label>
-              <input
-                type="range"
-                min="0"
-                max="3"
-                step="0.1"
-                value={settings.letterSpacing}
-                onChange={(e) => setSettings({ ...settings, letterSpacing: parseFloat(e.target.value) })}
-              />
+              <input type="range" min="0" max="3" step="0.1" value={settings.letterSpacing} onChange={(e) => setSettings({ ...settings, letterSpacing: parseFloat(e.target.value) })} />
             </div>
             <div className="form-row">
               <label>
-                <input
-                  type="checkbox"
-                  checked={settings.bionic}
-                  onChange={(e) => setSettings({ ...settings, bionic: e.target.checked })}
-                />
+                <input type="checkbox" checked={settings.bionic} onChange={(e) => setSettings({ ...settings, bionic: e.target.checked})} />
                 Bionic Reading
               </label>
             </div>
@@ -935,7 +593,7 @@ ${inputText}`;
       {showError && (
         <div className="modal-bg" onClick={() => setShowError(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ color: "var(--accent4)" }}>Error</h2>
+            <h2 style={{ color: "var(--color-red-500)" }}>Error</h2>
             <p className="mb-4">{errorMessage}</p>
             <button onClick={() => setShowError(false)}>Got It!</button>
           </div>
@@ -943,5 +601,4 @@ ${inputText}`;
       )}
     </div>
   );
-}
 }

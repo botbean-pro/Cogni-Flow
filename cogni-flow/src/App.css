@@ -1,37 +1,48 @@
 :root {
+    /* ===== YOUR CUSTOM COLOR PALETTE ===== */
+  /* Color assignments:
+     #7cccae - White: Backgrounds
+     #ff7523 - Light Blue: Primary actions, links
+     #ffd34d - Light Yellow: Highlights, hover effects
+     #ffba00 - Golden Yellow: Secondary buttons, accents
+     #7cccae - Mint Green: Success states
+     #ff7523 - Orange: Errors, warnings
+     #000000 - Dark Blue: Text, headers
+  */
+  
   /* Primitive Color Tokens */
-  --color-white: rgba(255, 255, 255, 1);
+  --color-white: #ffffff;
   --color-black: rgba(0, 0, 0, 1);
-  --color-cream-50: rgba(252, 252, 249, 1);
-  --color-cream-100: rgba(255, 255, 253, 1);
-  --color-gray-200: rgba(245, 245, 245, 1);
-  --color-gray-300: rgba(167, 169, 169, 1);
-  --color-gray-400: rgba(119, 124, 124, 1);
-  --color-slate-500: rgba(98, 108, 113, 1);
-  --color-brown-600: rgba(94, 82, 64, 1);
-  --color-charcoal-700: rgba(31, 33, 33, 1);
-  --color-charcoal-800: rgba(38, 40, 40, 1);
-  --color-slate-900: rgba(19, 52, 59, 1);
-  --color-teal-300: rgba(50, 184, 198, 1);
-  --color-teal-400: rgba(45, 166, 178, 1);
-  --color-teal-500: rgba(33, 128, 141, 1);
-  --color-teal-600: rgba(29, 116, 128, 1);
-  --color-teal-700: rgba(26, 104, 115, 1);
-  --color-teal-800: rgba(41, 150, 161, 1);
-  --color-red-400: rgba(255, 84, 89, 1);
-  --color-red-500: rgba(192, 21, 47, 1);
-  --color-orange-400: rgba(230, 129, 97, 1);
-  --color-orange-500: rgba(168, 75, 47, 1);
+  --color-cream-50: #7cccae;  /* Light blue-ish */
+  --color-cream-100: #7cccae;  /* Very light blue-ish */
+  --color-gray-200: #ffffff;
+  --color-gray-300: #000000;
+  --color-gray-400: #000000;
+  --color-slate-500: #000000;
+  --color-brown-600: #ffba00;
+  --color-charcoal-700: #000000;
+  --color-charcoal-800: #000000;
+  --color-slate-900: #000000;
+  --color-teal-300: #7cccae;
+  --color-teal-400: #7cccae;
+  --color-teal-500: #ff7523;
+  --color-teal-600: #ff7523;
+  --color-teal-700: #000000;
+  --color-teal-800: #ff7523;
+  --color-red-400: #ff7523;
+  --color-red-500: #ff7523;
+  --color-orange-400: #ffd34d;
+  --color-orange-500: #ffba00;
 
   /* RGB versions for opacity control */
-  --color-brown-600-rgb: 94, 82, 64;
-  --color-teal-500-rgb: 33, 128, 141;
-  --color-slate-900-rgb: 19, 52, 59;
-  --color-slate-500-rgb: 98, 108, 113;
-  --color-red-500-rgb: 192, 21, 47;
-  --color-red-400-rgb: 255, 84, 89;
-  --color-orange-500-rgb: 168, 75, 47;
-  --color-orange-400-rgb: 230, 129, 97;
+  --color-brown-600-rgb: 255, 186, 0;
+  --color-teal-500-rgb: 0, 164, 206;
+  --color-slate-900-rgb: 0, 24, 109;
+  --color-slate-500-rgb: 0, 24, 109;
+  --color-red-500-rgb: 255, 117, 35;
+  --color-red-400-rgb: 255, 117, 35;
+  --color-orange-500-rgb: 255, 186, 0;
+  --color-orange-400-rgb: 255, 211, 77;
 
   /* Background color tokens (Light Mode) */
   --color-bg-1: rgba(59, 130, 246, 0.08); /* Light blue */
@@ -43,19 +54,19 @@
   --color-bg-7: rgba(236, 72, 153, 0.08); /* Light pink */
   --color-bg-8: rgba(6, 182, 212, 0.08); /* Light cyan */
 
-  /* Semantic Color Tokens (Light Mode) */
-  --color-background: var(--color-cream-50);
-  --color-surface: var(--color-cream-100);
-  --color-text: var(--color-slate-900);
-  --color-text-secondary: var(--color-slate-500);
-  --color-primary: var(--color-teal-500);
-  --color-primary-hover: var(--color-teal-600);
-  --color-primary-active: var(--color-teal-700);
+    /* Semantic Color Tokens (Light Mode) */
+  --color-background: #7cccae;  /* Light blue-ish background */
+  --color-surface: #ffba00;  /* Dark yellow panels */
+  --color-text: #000000;
+  --color-text-secondary: #000000;
+  --color-primary: #ff7523;
+  --color-primary-hover: #ff9555;
+  --color-primary-active: #ff6020;
   --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
   --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
   --color-secondary-active: rgba(var(--color-brown-600-rgb), 0.25);
   --color-border: rgba(var(--color-brown-600-rgb), 0.2);
-  --color-btn-primary-text: var(--color-cream-50);
+  --color-btn-primary-text: #ffffff;
   --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
   --color-card-border-inner: rgba(var(--color-brown-600-rgb), 0.12);
   --color-error: var(--color-red-500);
@@ -74,10 +85,10 @@
   --select-caret-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f5f5f5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
 
   /* RGB versions for opacity control */
-  --color-success-rgb: 33, 128, 141;
-  --color-error-rgb: 192, 21, 47;
-  --color-warning-rgb: 168, 75, 47;
-  --color-info-rgb: 98, 108, 113;
+  --color-success-rgb: 0, 164, 206;
+  --color-error-rgb: 255, 117, 35;
+  --color-warning-rgb: 255, 186, 0;
+  --color-info-rgb: 0, 24, 109;
 
   /* Typography */
   --font-family-base: "FKGroteskNeue", "Geist", "Inter", -apple-system,
@@ -165,7 +176,7 @@
 
     /* Semantic Color Tokens (Dark Mode) */
     --color-background: var(--color-charcoal-700);
-    --color-surface: var(--color-charcoal-800);
+  --color-surface: #ffba00;  /* Dark yellow panels */
     --color-text: var(--color-gray-200);
     --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.7);
     --color-primary: var(--color-teal-300);
@@ -225,7 +236,7 @@
 
   /* Semantic Color Tokens (Dark Mode) */
   --color-background: var(--color-charcoal-700);
-  --color-surface: var(--color-charcoal-800);
+  --color-surface: #ffba00;  /* Dark yellow panels */
   --color-text: var(--color-gray-200);
   --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.7);
   --color-primary: var(--color-teal-300);
@@ -265,23 +276,23 @@
 
 [data-color-scheme="light"] {
   /* RGB versions for opacity control (light mode) */
-  --color-brown-600-rgb: 94, 82, 64;
-  --color-teal-500-rgb: 33, 128, 141;
-  --color-slate-900-rgb: 19, 52, 59;
+  --color-brown-600-rgb: 255, 186, 0;
+  --color-teal-500-rgb: 0, 164, 206;
+  --color-slate-900-rgb: 0, 24, 109;
 
-  /* Semantic Color Tokens (Light Mode) */
-  --color-background: var(--color-cream-50);
-  --color-surface: var(--color-cream-100);
-  --color-text: var(--color-slate-900);
-  --color-text-secondary: var(--color-slate-500);
-  --color-primary: var(--color-teal-500);
-  --color-primary-hover: var(--color-teal-600);
-  --color-primary-active: var(--color-teal-700);
+    /* Semantic Color Tokens (Light Mode) */
+  --color-background: #7cccae;  /* Light blue-ish background */
+  --color-surface: #ffba00;  /* Dark yellow panels */
+  --color-text: #000000;
+  --color-text-secondary: #000000;
+  --color-primary: #ff7523;
+  --color-primary-hover: #ff9555;
+  --color-primary-active: #ff6020;
   --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
   --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
   --color-secondary-active: rgba(var(--color-brown-600-rgb), 0.25);
   --color-border: rgba(var(--color-brown-600-rgb), 0.2);
-  --color-btn-primary-text: var(--color-cream-50);
+  --color-btn-primary-text: #ffffff;
   --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
   --color-card-border-inner: rgba(var(--color-brown-600-rgb), 0.12);
   --color-error: var(--color-red-500);
@@ -569,42 +580,42 @@ select.form-control {
 
 .status--success {
   background-color: rgba(
-    var(--color-success-rgb, 33, 128, 141),
+    var(--color-success-rgb, 0, 164, 206),
     var(--status-bg-opacity)
   );
   color: var(--color-success);
   border: 1px solid
-    rgba(var(--color-success-rgb, 33, 128, 141), var(--status-border-opacity));
+    rgba(var(--color-success-rgb, 0, 164, 206), var(--status-border-opacity));
 }
 
 .status--error {
   background-color: rgba(
-    var(--color-error-rgb, 192, 21, 47),
+    var(--color-error-rgb, 255, 117, 35),
     var(--status-bg-opacity)
   );
   color: var(--color-error);
   border: 1px solid
-    rgba(var(--color-error-rgb, 192, 21, 47), var(--status-border-opacity));
+    rgba(var(--color-error-rgb, 255, 117, 35), var(--status-border-opacity));
 }
 
 .status--warning {
   background-color: rgba(
-    var(--color-warning-rgb, 168, 75, 47),
+    var(--color-warning-rgb, 255, 186, 0),
     var(--status-bg-opacity)
   );
   color: var(--color-warning);
   border: 1px solid
-    rgba(var(--color-warning-rgb, 168, 75, 47), var(--status-border-opacity));
+    rgba(var(--color-warning-rgb, 255, 186, 0), var(--status-border-opacity));
 }
 
 .status--info {
   background-color: rgba(
-    var(--color-info-rgb, 98, 108, 113),
+    var(--color-info-rgb, 0, 24, 109),
     var(--status-bg-opacity)
   );
   color: var(--color-info);
   border: 1px solid
-    rgba(var(--color-info-rgb, 98, 108, 113), var(--status-border-opacity));
+    rgba(var(--color-info-rgb, 0, 24, 109), var(--status-border-opacity));
 }
 
 /* Container layout */
@@ -739,39 +750,50 @@ select.form-control {
 
 /* END PERPLEXITY DESIGN SYSTEM */
 :root {
+    /* ===== YOUR CUSTOM COLOR PALETTE ===== */
+  /* Color assignments:
+     #7cccae - White: Backgrounds
+     #ff7523 - Light Blue: Primary actions, links
+     #ffd34d - Light Yellow: Highlights, hover effects
+     #ffba00 - Golden Yellow: Secondary buttons, accents
+     #7cccae - Mint Green: Success states
+     #ff7523 - Orange: Errors, warnings
+     #000000 - Dark Blue: Text, headers
+  */
+  
   /* Primitive Color Tokens */
-  --color-white: rgba(255, 255, 255, 1);
+  --color-white: #ffffff;
   --color-black: rgba(0, 0, 0, 1);
-  --color-cream-50: rgba(252, 252, 249, 1);
-  --color-cream-100: rgba(255, 255, 253, 1);
-  --color-gray-200: rgba(245, 245, 245, 1);
-  --color-gray-300: rgba(167, 169, 169, 1);
-  --color-gray-400: rgba(119, 124, 124, 1);
-  --color-slate-500: rgba(98, 108, 113, 1);
-  --color-brown-600: rgba(94, 82, 64, 1);
-  --color-charcoal-700: rgba(31, 33, 33, 1);
-  --color-charcoal-800: rgba(38, 40, 40, 1);
-  --color-slate-900: rgba(19, 52, 59, 1);
-  --color-teal-300: rgba(50, 184, 198, 1);
-  --color-teal-400: rgba(45, 166, 178, 1);
-  --color-teal-500: rgba(33, 128, 141, 1);
-  --color-teal-600: rgba(29, 116, 128, 1);
-  --color-teal-700: rgba(26, 104, 115, 1);
-  --color-teal-800: rgba(41, 150, 161, 1);
-  --color-red-400: rgba(255, 84, 89, 1);
-  --color-red-500: rgba(192, 21, 47, 1);
-  --color-orange-400: rgba(230, 129, 97, 1);
-  --color-orange-500: rgba(168, 75, 47, 1);
+  --color-cream-50: #7cccae;  /* Light blue-ish */
+  --color-cream-100: #7cccae;  /* Very light blue-ish */
+  --color-gray-200: #ffffff;
+  --color-gray-300: #000000;
+  --color-gray-400: #000000;
+  --color-slate-500: #000000;
+  --color-brown-600: #ffba00;
+  --color-charcoal-700: #000000;
+  --color-charcoal-800: #000000;
+  --color-slate-900: #000000;
+  --color-teal-300: #7cccae;
+  --color-teal-400: #7cccae;
+  --color-teal-500: #ff7523;
+  --color-teal-600: #ff7523;
+  --color-teal-700: #000000;
+  --color-teal-800: #ff7523;
+  --color-red-400: #ff7523;
+  --color-red-500: #ff7523;
+  --color-orange-400: #ffd34d;
+  --color-orange-500: #ffba00;
 
   /* RGB versions for opacity control */
-  --color-brown-600-rgb: 94, 82, 64;
-  --color-teal-500-rgb: 33, 128, 141;
-  --color-slate-900-rgb: 19, 52, 59;
-  --color-slate-500-rgb: 98, 108, 113;
-  --color-red-500-rgb: 192, 21, 47;
-  --color-red-400-rgb: 255, 84, 89;
-  --color-orange-500-rgb: 168, 75, 47;
-  --color-orange-400-rgb: 230, 129, 97;
+  --color-brown-600-rgb: 255, 186, 0;
+  --color-teal-500-rgb: 0, 164, 206;
+  --color-slate-900-rgb: 0, 24, 109;
+  --color-slate-500-rgb: 0, 24, 109;
+  --color-red-500-rgb: 255, 117, 35;
+  --color-red-400-rgb: 255, 117, 35;
+  --color-orange-500-rgb: 255, 186, 0;
+  --color-orange-400-rgb: 255, 211, 77;
 
   /* Background color tokens (Light Mode) */
   --color-bg-1: rgba(59, 130, 246, 0.08); /* Light blue */
@@ -783,19 +805,19 @@ select.form-control {
   --color-bg-7: rgba(236, 72, 153, 0.08); /* Light pink */
   --color-bg-8: rgba(6, 182, 212, 0.08); /* Light cyan */
 
-  /* Semantic Color Tokens (Light Mode) */
-  --color-background: var(--color-cream-50);
-  --color-surface: var(--color-cream-100);
-  --color-text: var(--color-slate-900);
-  --color-text-secondary: var(--color-slate-500);
-  --color-primary: var(--color-teal-500);
-  --color-primary-hover: var(--color-teal-600);
-  --color-primary-active: var(--color-teal-700);
+    /* Semantic Color Tokens (Light Mode) */
+  --color-background: #7cccae;  /* Light blue-ish background */
+  --color-surface: #ffba00;  /* Dark yellow panels */
+  --color-text: #000000;
+  --color-text-secondary: #000000;
+  --color-primary: #ff7523;
+  --color-primary-hover: #ff9555;
+  --color-primary-active: #ff6020;
   --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
   --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
   --color-secondary-active: rgba(var(--color-brown-600-rgb), 0.25);
   --color-border: rgba(var(--color-brown-600-rgb), 0.2);
-  --color-btn-primary-text: var(--color-cream-50);
+  --color-btn-primary-text: #ffffff;
   --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
   --color-card-border-inner: rgba(var(--color-brown-600-rgb), 0.12);
   --color-error: var(--color-red-500);
@@ -814,10 +836,10 @@ select.form-control {
   --select-caret-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f5f5f5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
 
   /* RGB versions for opacity control */
-  --color-success-rgb: 33, 128, 141;
-  --color-error-rgb: 192, 21, 47;
-  --color-warning-rgb: 168, 75, 47;
-  --color-info-rgb: 98, 108, 113;
+  --color-success-rgb: 0, 164, 206;
+  --color-error-rgb: 255, 117, 35;
+  --color-warning-rgb: 255, 186, 0;
+  --color-info-rgb: 0, 24, 109;
 
   /* Typography */
   --font-family-base: "FKGroteskNeue", "Geist", "Inter", -apple-system,
@@ -905,7 +927,7 @@ select.form-control {
 
     /* Semantic Color Tokens (Dark Mode) */
     --color-background: var(--color-charcoal-700);
-    --color-surface: var(--color-charcoal-800);
+  --color-surface: #ffba00;  /* Dark yellow panels */
     --color-text: var(--color-gray-200);
     --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.7);
     --color-primary: var(--color-teal-300);
@@ -965,7 +987,7 @@ select.form-control {
 
   /* Semantic Color Tokens (Dark Mode) */
   --color-background: var(--color-charcoal-700);
-  --color-surface: var(--color-charcoal-800);
+  --color-surface: #ffba00;  /* Dark yellow panels */
   --color-text: var(--color-gray-200);
   --color-text-secondary: rgba(var(--color-gray-300-rgb), 0.7);
   --color-primary: var(--color-teal-300);
@@ -1005,23 +1027,23 @@ select.form-control {
 
 [data-color-scheme="light"] {
   /* RGB versions for opacity control (light mode) */
-  --color-brown-600-rgb: 94, 82, 64;
-  --color-teal-500-rgb: 33, 128, 141;
-  --color-slate-900-rgb: 19, 52, 59;
+  --color-brown-600-rgb: 255, 186, 0;
+  --color-teal-500-rgb: 0, 164, 206;
+  --color-slate-900-rgb: 0, 24, 109;
 
-  /* Semantic Color Tokens (Light Mode) */
-  --color-background: var(--color-cream-50);
-  --color-surface: var(--color-cream-100);
-  --color-text: var(--color-slate-900);
-  --color-text-secondary: var(--color-slate-500);
-  --color-primary: var(--color-teal-500);
-  --color-primary-hover: var(--color-teal-600);
-  --color-primary-active: var(--color-teal-700);
+    /* Semantic Color Tokens (Light Mode) */
+  --color-background: #7cccae;  /* Light blue-ish background */
+  --color-surface: #ffba00;  /* Dark yellow panels */
+  --color-text: #000000;
+  --color-text-secondary: #000000;
+  --color-primary: #ff7523;
+  --color-primary-hover: #ff9555;
+  --color-primary-active: #ff6020;
   --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
   --color-secondary-hover: rgba(var(--color-brown-600-rgb), 0.2);
   --color-secondary-active: rgba(var(--color-brown-600-rgb), 0.25);
   --color-border: rgba(var(--color-brown-600-rgb), 0.2);
-  --color-btn-primary-text: var(--color-cream-50);
+  --color-btn-primary-text: #ffffff;
   --color-card-border: rgba(var(--color-brown-600-rgb), 0.12);
   --color-card-border-inner: rgba(var(--color-brown-600-rgb), 0.12);
   --color-error: var(--color-red-500);
@@ -1309,42 +1331,42 @@ select.form-control {
 
 .status--success {
   background-color: rgba(
-    var(--color-success-rgb, 33, 128, 141),
+    var(--color-success-rgb, 0, 164, 206),
     var(--status-bg-opacity)
   );
   color: var(--color-success);
   border: 1px solid
-    rgba(var(--color-success-rgb, 33, 128, 141), var(--status-border-opacity));
+    rgba(var(--color-success-rgb, 0, 164, 206), var(--status-border-opacity));
 }
 
 .status--error {
   background-color: rgba(
-    var(--color-error-rgb, 192, 21, 47),
+    var(--color-error-rgb, 255, 117, 35),
     var(--status-bg-opacity)
   );
   color: var(--color-error);
   border: 1px solid
-    rgba(var(--color-error-rgb, 192, 21, 47), var(--status-border-opacity));
+    rgba(var(--color-error-rgb, 255, 117, 35), var(--status-border-opacity));
 }
 
 .status--warning {
   background-color: rgba(
-    var(--color-warning-rgb, 168, 75, 47),
+    var(--color-warning-rgb, 255, 186, 0),
     var(--status-bg-opacity)
   );
   color: var(--color-warning);
   border: 1px solid
-    rgba(var(--color-warning-rgb, 168, 75, 47), var(--status-border-opacity));
+    rgba(var(--color-warning-rgb, 255, 186, 0), var(--status-border-opacity));
 }
 
 .status--info {
   background-color: rgba(
-    var(--color-info-rgb, 98, 108, 113),
+    var(--color-info-rgb, 0, 24, 109),
     var(--status-bg-opacity)
   );
   color: var(--color-info);
   border: 1px solid
-    rgba(var(--color-info-rgb, 98, 108, 113), var(--status-border-opacity));
+    rgba(var(--color-info-rgb, 0, 24, 109), var(--status-border-opacity));
 }
 
 /* Container layout */
@@ -1587,7 +1609,7 @@ h1 {
 }
 
 .right button:hover {
-  background: var(--color-orange-500);
+  background: #ff9555;  /* Light red hover */
 }
 
 .right button:focus-visible {
@@ -1754,7 +1776,7 @@ textarea, input[type="url"], input[type="file"] {
   width: 100%;
   font-size: var(--font-size-lg);
   color: var(--color-text) !important;
-  background: var(--color-surface);
+  background: #ffba00;  /* Yellow input background */
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: var(--space-16);
@@ -1801,7 +1823,7 @@ button {
 }
 
 button:hover {
-  background: var(--color-orange-500);
+  background: #ff9555;  /* Light red hover */
 }
 
 button:focus-visible {
@@ -2069,7 +2091,7 @@ button:disabled {
 }
 
 .modal {
-  background: var(--color-surface);
+  background: #ffba00;  /* Dark yellow modal */
   padding: var(--space-32);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
@@ -2108,7 +2130,7 @@ input[type=range], select {
   border-radius: var(--radius-sm);
   border: 1px solid var(--color-border);
   color: var(--color-text) !important;
-  background: var(--color-surface);
+  background: #ffba00;  /* Yellow input background */
   font-family: var(--font-family-base);
 }
 
@@ -2158,7 +2180,7 @@ select {
 }
 
 .actions button:hover {
-  background: var(--color-orange-500);
+  background: #ff9555;  /* Light red hover */
 }
 
 .actions button:focus-visible {
@@ -2368,51 +2390,8 @@ select {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: var(--color-cream-50);
+  background: #7cccae;
   pointer-events: none;
-}
-
-.logo-animated {
-  position: fixed;
-  z-index: 1001;
-  max-width: 1900px;
-  height: auto;
-  transition: all 1.05s var(--ease-standard);
-  pointer-events: none;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-}
-
-.logo-top {
-  top: 0%;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: 1900px;
-}
-.logo-bottom-left {
-  bottom: 0vh;
-  left: 0vw;
-  max-width: 300px;
-}
-.logo-bottom-right {
-  bottom: 0vh;
-  right: 0vw;
-  max-width: 455px;
-}
-.logo-center {
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  max-width: 320px;
-}
-
-.logo-center.to-header {
-  position: fixed !important;
-  top: var(--space-20) !important;
-  left: 40px !important;
-  transform: scale(0.6) !important;
-  z-index: 1100 !important;
-  max-width: 120px !important;
 }
 
 .hero-section {
@@ -2452,7 +2431,7 @@ select {
 }
 .enter-app-btn {
   background: linear-gradient(45deg, var(--color-orange-500), var(--color-teal-400));
-  color: var(--color-cream-50) !important;
+  color: #ffffff !important;
   border: none;
   border-radius: var(--radius-full);
   padding: var(--space-20) 44px;
@@ -2557,6 +2536,7 @@ select {
 }
 
 .main-app-content .tab-panel {
+  background: #ffba00;  /* Dark yellow panel */
   background: #222 !important;
   color: white !important;
 }
@@ -2583,18 +2563,18 @@ select {
 .main-app-content textarea,
 .main-app-content input[type="url"],
 .main-app-content input[type="file"] {
-  background: #333 !important;
+  background: #ffba00;  /* Yellow input background */
   color: white !important;
   border: 1px solid #555 !important;
 }
 
 .main-app-content button {
-  background: #666 !important;
+  background: #ffba00;  /* Yellow input background */
   color: white !important;
 }
 
 .main-app-content button:hover {
-  background: #777 !important;
+  background: #ff9555;  /* Light red hover */
 }
 
 /* Hero section adjustments */
@@ -2638,7 +2618,7 @@ select {
 
 .enter-app-btn {
   background: linear-gradient(45deg, var(--color-orange-500), var(--color-teal-400));
-  color: var(--color-cream-50) !important;
+  color: #ffffff !important;
   border: none;
   border-radius: var(--radius-full);
   padding: var(--space-20) 44px;
@@ -2661,4 +2641,492 @@ select {
 .enter-app-btn:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
+}
+
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+.home-page {
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.front-section {
+  position: relative;
+  height: 100vh;
+  overflow: hidden; 
+}
+
+.front-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 120%;
+  background-image: "Cogni-Flow-1.png";
+  background-size: cover;
+  background-position: center;
+  transform: translateY(0);
+  transition: transform 0.1s linear;
+  z-index: -1;
+}
+/* ===== MAIN IMAGE HEADER STYLES ===== */
+/* This replaces the logo area with your Main-Image.png */
+.main-image-header {
+  width: 100%;
+  height: 400px; /* Adjust this to control image area height */
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(135deg, var(--theme-primary-accent), var(--theme-secondary-accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-lg);
+}
+
+.main-header-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Change to 'contain' if you want full image visible */
+  opacity: 0.95;
+  animation: fadeIn 1s ease-out;
+}
+
+/* Modified header without logo section */
+.title-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.title-section h1 {
+  font-size: var(--font-size-3xl);
+  color: var(--color-btn-primary-text) !important;
+  margin: 0;
+  font-weight: var(--font-weight-bold);
+}
+
+/* Hide old logo elements */
+.static-logo-header,
+.logo-section,
+.logo {
+  display: none !important;
+}
+
+/* Responsive adjustments for main image */
+@media (max-width: 768px) {
+  .main-image-header {
+    height: 250px;
+  }
+  
+  .title-section h1 {
+    font-size: var(--font-size-2xl);
+  }
+  
+  .subtitle {
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .main-image-header {
+    height: 200px;
+  }
+}
+
+/* ===== MAIN IMAGE HEADER STYLES ===== */
+.main-image-header {
+  width: 100%;
+  height: 100vh;  /* Full viewport height - covers whole screen */
+  overflow: hidden;
+  position: relative;
+  background: #ff7523; /* Light Blue fills empty space */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0;
+}
+
+.main-header-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Fills entire area - may crop edges */
+  opacity: 1;
+  animation: fadeIn 1s ease-out;
+}
+
+/* Optional: Scroll indicator */
+.main-image-header::after {
+  content: "⬇ Scroll Down";
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #000000;  /* Changed to black for visibility */
+  font-size: 18px;
+  font-weight: 600;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);  /* White shadow for contrast */
+  animation: bounce 2s infinite;
+  z-index: 10;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  40% {
+    transform: translateX(-50%) translateY(-20px);
+  }
+  60% {
+    transform: translateX(-50%) translateY(-10px);
+  }
+}
+
+/* Simplified header without logo */
+.title-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Hide old logo elements */
+.static-logo-header,
+.logo-section,
+.logo {
+  display: none !important;
+}
+
+/* Update header to use dark blue */
+.header {
+  background: #ff9555 !important;
+  border-bottom: 3px solid #000000 !important;
+}
+
+.title-section h1 {
+  color: #ffffff !important;
+}
+
+.subtitle {
+  color: #ffd34d !important;
+}
+
+/* Navigation updates */
+.tab-btn:hover {
+  background: #ff9555 !important;  /* Light red hover */
+  color: #ffffff !important;  /* White text on orange */
+}
+
+.tab-btn.active {
+  background: #ff7523 !important;
+  color: #ffffff !important;
+}
+
+/* Settings buttons */
+.right button {
+  background: #ff9555 !important;
+}
+
+.right button:hover {
+  background: #ff9555;  /* Light red hover */
+}
+
+/* Update body background */
+body {
+  background-color: #7cccae !important;  /* Light blue-ish background */
+}
+
+/* Responsive image header - Keep full height on all devices */
+@media (max-width: 768px) {
+  .main-image-header {
+    height: 100vh;  /* Keep full viewport height on tablet */
+  }
+}
+
+@media (max-width: 480px) {
+  .main-image-header {
+    height: 100vh;  /* Keep full viewport height on mobile */
+    height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  }
+  
+  .main-image-header::after {
+    font-size: 16px;
+    bottom: 20px;
+  }
+}
+
+/* ===== CUSTOM COLOR OVERRIDES ===== */
+
+/* Header styling */
+.header {
+  background: #ff7523 !important;  /* Red header */  /* Red header */
+  border-bottom: 3px solid #000000 !important;  /* Black border */
+}
+
+/* Logo space */
+.logo-space {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo-space img {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  border: 2px solid #000000;
+}
+
+/* Tab styling */
+.tab-btn {
+  background: #ffba00 !important;  /* Dark yellow tabs */
+  color: #000000 !important;  /* Black text */
+  border-bottom: 3px solid transparent;
+}
+
+.tab-btn:hover {
+  background: #ffd34d !important;  /* Light yellow hover */
+  color: #000000 !important;
+}
+
+.tab-btn.active {
+  background: #ff7523 !important;  /* Red active tab */
+  color: #ffffff !important;  /* White text on red */
+  border-bottom-color: #000000 !important;
+}
+
+/* Button styling */
+button {
+  background: #ff7523 !important;  /* Red buttons */
+  color: #ffffff !important;
+}
+
+button:hover {
+  background: #ff9555;  /* Light red hover */
+}
+
+/* Settings buttons specific */
+.right button {
+  background: #ff7523 !important;  /* Red */
+}
+
+.right button:hover {
+  background: #ff9555;  /* Light red hover */
+}
+
+/* Input fields */
+input, textarea, select {
+  background-color: #7cccae !important;
+  border: 2px solid #000000 !important;  /* Black borders */
+  color: #000000 !important;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #ff7523 !important;  /* Red focus */
+  box-shadow: 0 0 0 3px rgba(255, 117, 35, 0.2) !important;
+}
+
+/* Panels and cards */
+.tab-panel {
+  background: #ffba00;  /* Dark yellow panel */
+  background: #ffba00 !important;  /* Dark yellow */
+  border: 1px solid #000000 !important;
+  color: #000000 !important;
+}
+
+/* Modal */
+.modal {
+  background: #ffba00;  /* Dark yellow modal */
+  border: 2px solid #000000 !important;
+}
+
+/* Speech controls background */
+.speech-controls {
+  background: rgba(255, 186, 0, 0.3) !important;  /* Yellow tint */
+}
+
+/* Main app background */
+.App {
+  background-color: #7cccae !important;  /* Green */
+}
+
+main {
+  background: #7cccae !important;  /* Green */
+}
+
+body {
+  background-color: #7cccae !important;  /* Green */
+}
+
+/* Flashcard colors */
+.flashcard-front {
+  background: #ff7523 !important;  /* Red */
+}
+
+.flashcard-back {
+  background: #ffba00 !important;  /* Yellow */
+  color: #000000 !important;
+}
+
+/* Links */
+a {
+  color: #ff7523 !important;  /* Red links */
+}
+
+a:hover {
+  color: #ff9555 !important;  /* Light red hover */
+}
+
+/* 
+/* ===== FINAL COLOR SCHEME STYLES ===== */
+
+/* Logo space styling */
+.logo-space {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8);
+}
+
+.logo-space img {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  background-color: #ffffff;
+  padding: 4px;
+}
+
+/* Ensure all buttons are red */
+button, .btn {
+  background: #ff7523 !important;
+  color: #ffffff !important;
+}
+
+button:hover, .btn:hover {
+  background: #ff9555 !important;
+}
+
+/* Ensure all inputs have black borders and yellow background */
+input, textarea, select {
+  background: #ffba00 !important;
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #000000 !important;
+  box-shadow: 0 0 0 3px rgba(255, 117, 35, 0.2) !important;
+}
+
+/* Tab panels yellow background */
+.tab-panel {
+  background: #ffba00 !important;
+  color: #000000 !important;
+}
+
+/* Modal yellow background */
+.modal {
+  background: #ffba00 !important;
+  border: 2px solid #000000 !important;
+  color: #000000 !important;
+}
+
+/* Main content area green */
+main {
+  background: #7cccae !important;
+}
+
+/* Body green background */
+body {
+  background-color: #7cccae !important;
+}
+
+/* App container green */
+.App {
+  background-color: #7cccae !important;
+}
+
+/* Links red */
+a {
+  color: #ff7523 !important;
+}
+
+a:hover {
+  color: #ff9555 !important;
+}
+
+/* All text black for readability */
+p, h1, h2, h3, h4, h5, h6, span, div, label {
+  color: #000000 !important;
+}
+
+/* White text only on colored backgrounds */
+.header *, 
+button *, 
+.tab-btn.active * {
+  color: #ffffff !important;
+}
+
+/* Tab specific colors */
+.tab-btn {
+  background: #ffba00 !important;
+  color: #000000 !important;
+}
+
+.tab-btn:hover {
+  background: #ff9555 !important;
+  color: #ffffff !important;
+}
+
+.tab-btn.active {
+  background: #ff7523 !important;
+  color: #ffffff !important;
+}
+
+/* Settings buttons red */
+.right button {
+  background: #ff7523 !important;
+}
+
+.right button:hover {
+  background: #ff9555 !important;
+}
+
+/* Speech controls */
+.speech-controls {
+  background: rgba(255, 186, 0, 0.3) !important;
+}
+
+.speech-btn {
+  background: #ff7523 !important;
+}
+
+.speech-btn:hover {
+  background: #ff9555 !important;
+}
+
+/* Flashcards */
+.flashcard-front {
+  background: #ff7523 !important;
+}
+
+.flashcard-back {
+  background: #ffba00 !important;
+  color: #000000 !important;
+}
+
+/* Success/Error/Warning status colors */
+.status-success {
+  background: rgba(124, 204, 174, 0.2) !important;
+  border: 1px solid #7cccae !important;
+}
+
+.status-error {
+  background: rgba(255, 117, 35, 0.2) !important;
+  border: 1px solid #ff7523 !important;
+}
+
+.status-warning {
+  background: rgba(255, 186, 0, 0.2) !important;
+  border: 1px solid #ffba00 !important;
 }
