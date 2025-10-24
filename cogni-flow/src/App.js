@@ -62,6 +62,11 @@ export default function App() {
   const speechSentencesRef = useRef([]);
   const currentUtteranceRef = useRef(null);
   const endFallbackTimerRef = useRef(null);
+  const [showColorPopup, setShowColorPopup] = useState(false);
+  const [smartNotesColors, setSmartNotesColors] = useState({
+    background: "#ffffff",
+    text: "#2C3E50",
+  });
 
   useEffect(() => {
     const saved = localStorage.getItem("cogniSet");
@@ -724,7 +729,7 @@ export default function App() {
         </div>
         <div className="right">
           <button onClick={() => setShowSettings(true)} title="Settings">⚙️</button>
-          <button onClick={() => setTheme(theme === "scheme1" ? "scheme2" : "scheme1")} title="Switch Color Scheme">🎨</button>
+          <button onClick={() => setShowColorPopup(true)} title="Switch Color Scheme">🎨</button>
         </div>
       </header>
 
@@ -810,7 +815,8 @@ export default function App() {
                     textAlign: settings.textAlign,
                     padding: '20px',
                     minHeight: '300px',
-                    color: '#000000'
+                    color: smartNotesColors.text,
+                    background: smartNotesColors.background,
                   }} 
                   dangerouslySetInnerHTML={{ __html: notesContent }} 
                 />
@@ -995,6 +1001,76 @@ export default function App() {
             </div>
             <div className="actions">
               <button onClick={() => setShowSettings(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showColorPopup && (
+        <div className="modal-bg" onClick={() => setShowColorPopup(false)}>
+          <div className="modal color-settings-modal" onClick={(e) => e.stopPropagation()}>
+            <h2>🎨 Color Settings</h2>
+            <p className="form-help">
+              Choose the colors for the Smart Notes content area.
+            </p>
+            <div className="color-picker-row">
+              <div className="color-picker-control">
+                <label htmlFor="bgColor">Background</label>
+                <input
+                  id="bgColor"
+                  type="color"
+                  value={smartNotesColors.background}
+                  onChange={(e) =>
+                    setSmartNotesColors({
+                      ...smartNotesColors,
+                      background: e.target.value,
+                    })
+                  }
+                  title="Select the background color for the notes."
+                />
+                <input
+                  type="text"
+                  value={smartNotesColors.background}
+                  onChange={(e) =>
+                    setSmartNotesColors({
+                      ...smartNotesColors,
+                      background: e.target.value,
+                    })
+                  }
+                  className="hex-input"
+                  maxLength="7"
+                />
+              </div>
+              <div className="color-picker-control">
+                <label htmlFor="textColor">Text</label>
+                <input
+                  id="textColor"
+                  type="color"
+                  value={smartNotesColors.text}
+                  onChange={(e) =>
+                    setSmartNotesColors({
+                      ...smartNotesColors,
+                      text: e.target.value,
+                    })
+                  }
+                  title="Select the text color for the notes."
+                />
+                <input
+                  type="text"
+                  value={smartNotesColors.text}
+                  onChange={(e) =>
+                    setSmartNotesColors({
+                      ...smartNotesColors,
+                      text: e.target.value,
+                    })
+                  }
+                  className="hex-input"
+                  maxLength="7"
+                />
+              </div>
+            </div>
+            <div className="actions">
+              <button onClick={() => setShowColorPopup(false)}>Close</button>
             </div>
           </div>
         </div>
