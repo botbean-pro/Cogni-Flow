@@ -143,6 +143,23 @@ export default function App() {
     return cleaned;
   };
 
+  const sanitizeHtmlForDisplay = (html) => {
+    if (!html || typeof html !== "string") return "";
+    let sanitized = html;
+    // Remove script and style blocks entirely
+    sanitized = sanitized.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "");
+    sanitized = sanitized.replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, "");
+    // Remove inline event handlers like onclick, onchange, etc.
+    sanitized = sanitized.replace(/\son[a-z]+\s*=\s*"[^"]*"/gi, "");
+    sanitized = sanitized.replace(/\son[a-z]+\s*=\s*'[^']*'/gi, "");
+    sanitized = sanitized.replace(/\son[a-z]+\s*=\s*[^\s>]+/gi, "");
+    // Unhide elements hidden via style or hidden attribute
+    sanitized = sanitized.replace(/style\s*=\s*"[^"]*display\s*:\s*none;?[^"]*"/gi, (m) => m.replace(/display\s*:\s*none;?/i, ""));
+    sanitized = sanitized.replace(/style\s*=\s*'[^']*display\s*:\s*none;?[^']*'/gi, (m) => m.replace(/display\s*:\s*none;?/i, ""));
+    sanitized = sanitized.replace(/\shidden(=\"?hidden\"?)?/gi, "");
+    return sanitized;
+  };
+
   const extractTextFromContent = (htmlContent) => {
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = htmlContent;
@@ -347,9 +364,9 @@ export default function App() {
         
         mindmap: `Create an HTML mind map with nested <div> elements. IMPORTANT: Return ONLY the HTML code, no explanations. Use inline CSS for styling (colors, borders, padding, margins). Structure it as a visual hierarchy with a main topic and branches. Content:\n\n${truncatedText}`,
         
-        quiz: `Generate 10 multiple-choice questions in HTML format. IMPORTANT: Return ONLY the HTML code, no explanations or instructions. Use <div> containers, proper structure, and include a way to check answers. Make questions clear and relevant. Content:\n\n${truncatedText}`,
+        quiz: `Generate 10 multiple-choice questions in PURE STATIC HTML (no scripts). STRICT RULES: 1) Return ONLY HTML; 2) NO <script>, NO <style>, NO event handlers (like onclick); 3) For each question, use <div class="q"> with the question text in <strong>, followed by a <ul> of four <li> options labeled A) B) C) D); 4) Immediately after the options, include <p class="answer"><strong>Answer:</strong> X)</p> where X is the correct option letter. Use only semantic HTML. No comments, no explanations after the HTML. Content:\n\n${truncatedText}`,
         
-        flashcard: `Create 10 flashcards in HTML format. IMPORTANT: Return ONLY the HTML code with no explanations, comments, or instructions after the HTML. Use <div> elements with classes 'flashcard', 'card-front', 'card-back'. Include inline CSS for styling. Make questions concise and answers clear. Content:\n\n${truncatedText}`
+        flashcard: `Create 10 flashcards in PURE STATIC HTML (no scripts). STRICT RULES: 1) Return ONLY HTML; 2) NO <script>, NO <style>, NO inline event handlers; 3) Structure each card as <div class="flashcard"><div class="card-front">Q...</div><div class="card-back">A...</div></div>; 4) Do NOT include any CSS transforms or rotation; 5) Keep content concise. Content:\n\n${truncatedText}`
       };
 
       for (const [type, prompt] of Object.entries(prompts)) {
@@ -395,12 +412,18 @@ export default function App() {
                 break;
               case "quiz": 
                 console.log("💾 Setting QUIZ content...");
-                setQuizContent(cleanedResponse);
+                {
+                  const sanitizedQuiz = sanitizeHtmlForDisplay(cleanedResponse);
+                  setQuizContent(sanitizedQuiz);
+                }
                 console.log("✅ Quiz content SET successfully");
                 break;
               case "flashcard": 
                 console.log("💾 Setting FLASHCARD content...");
-                setFlashcardContent(cleanedResponse);
+                {
+                  const sanitizedFlash = sanitizeHtmlForDisplay(cleanedResponse);
+                  setFlashcardContent(sanitizedFlash);
+                }
                 console.log("✅ Flashcard content SET successfully");
                 break;
               default:
