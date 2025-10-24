@@ -59,7 +59,7 @@
   --color-surface: #ffba00;  /* Dark yellow panels */
   --color-text: #000000;
   --color-text-secondary: #000000;
-  --color-primary: #ff000d;
+  --color-primary: #5BB5A2;
   --color-primary-hover: #ff4040;
   --color-primary-active: #ff6020;
   --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
@@ -285,7 +285,7 @@
   --color-surface: #ffba00;  /* Dark yellow panels */
   --color-text: #000000;
   --color-text-secondary: #000000;
-  --color-primary: #ff000d;
+  --color-primary: #5BB5A2;
   --color-primary-hover: #ff4040;
   --color-primary-active: #ff6020;
   --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
@@ -810,7 +810,7 @@ select.form-control {
   --color-surface: #ffba00;  /* Dark yellow panels */
   --color-text: #000000;
   --color-text-secondary: #000000;
-  --color-primary: #ff000d;
+  --color-primary: #5BB5A2;
   --color-primary-hover: #ff4040;
   --color-primary-active: #ff6020;
   --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
@@ -1036,7 +1036,7 @@ select.form-control {
   --color-surface: #ffba00;  /* Dark yellow panels */
   --color-text: #000000;
   --color-text-secondary: #000000;
-  --color-primary: #ff000d;
+  --color-primary: #5BB5A2;
   --color-primary-hover: #ff4040;
   --color-primary-active: #ff6020;
   --color-secondary: rgba(var(--color-brown-600-rgb), 0.12);
@@ -1593,73 +1593,84 @@ h1 {
 
 .right button {
   font-size: var(--font-size-xl);
-  background: var(--theme-secondary-accent);
-  color: var(--color-btn-primary-text) !important;
+  background: linear-gradient(135deg, #FF9A8B 0%, #FF6A88 100%) !important;
+  color: #ffffff !important;
   border: none;
   border-radius: var(--radius-full);
   width: 45px;
   height: 45px;
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-standard);
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 8px rgba(255, 154, 139, 0.3);
   flex-shrink: 0;
 }
 
 .right button:hover {
-  background: #ff4040;  /* Lighter red hover */
+  background: linear-gradient(135deg, #FFB6A8 0%, #FF8BA5 100%) !important;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 154, 139, 0.4);
 }
 
 .right button:focus-visible {
   outline: none;
-  box-shadow: var(--focus-ring);
+  box-shadow: 0 0 0 3px rgba(255, 154, 139, 0.3);
 }
 
 nav {
   display: flex;
-  background: var(--color-surface);
-  border-bottom: var(--space-2) solid var(--color-border);
-  box-shadow: var(--shadow-sm);
-  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  background: #ffffff;
+  border-bottom: 2px solid #E0E0E0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 0 0 12px 12px;
   overflow: hidden;
   width: 100%;
 }
 
 .tab-btn {
   flex: 1;
-  color: var(--color-text) !important;
+  color: #2C3E50 !important;
   padding: var(--space-16) var(--space-12);
-  background: none;
+  background: #ffffff !important;
   border: none;
   font-weight: var(--font-weight-medium);
   font-size: var(--font-size-lg);
-  border-bottom: var(--space-2) solid transparent;
-  transition: color var(--duration-fast) var(--ease-standard), 
-              border-color var(--duration-fast) var(--ease-standard),
-              background-color var(--duration-fast) var(--ease-standard);
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
   text-align: center;
   white-space: nowrap;
   font-family: var(--font-family-base);
+  border-radius: 12px 12px 0 0;
 }
 
 .tab-btn:hover:not(.active) {
-  background: var(--color-secondary);
+  background: linear-gradient(135deg, #FFD54F 0%, #FFE082 100%) !important;
+  color: #2C3E50 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
 }
 
 .tab-btn:focus-visible {
   outline: none;
-  box-shadow: var(--focus-ring);
+  box-shadow: 0 0 0 3px rgba(91, 181, 162, 0.2);
 }
 
 .tab-btn.active {
-  color: var(--theme-primary-accent) !important;
-  border-bottom: var(--space-2) solid var(--theme-primary-accent);
+  color: #ffffff !important;
+  border-bottom: 3px solid transparent;
   font-weight: var(--font-weight-bold);
-  background: var(--color-secondary);
+  background: linear-gradient(135deg, #5BB5A2 0%, #4DD0E1 100%) !important;
+  box-shadow: 0 -2px 8px rgba(91, 181, 162, 0.4);
+}
+
+/* Other tabs when not active - yellow/orange gradient */
+.tab-btn:not(.active) {
+  background: linear-gradient(135deg, #FFC107 0%, #FFD54F 100%) !important;
+  color: #2C3E50 !important;
 }
 
 main {
@@ -1716,16 +1727,16 @@ main {
 }
 
 .speech-btn {
-  background: var(--theme-primary-accent);
-  color: var(--color-btn-primary-text) !important;
+  background: linear-gradient(135deg, #5BB5A2 0%, #4DD0E1 100%) !important;
+  color: #ffffff !important;
   border: none;
   border-radius: var(--radius-full);
   padding: var(--space-10) var(--space-20);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-standard);
-  box-shadow: var(--shadow-md);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(91, 181, 162, 0.3);
   display: flex;
   align-items: center;
   gap: var(--space-8);
@@ -1733,22 +1744,30 @@ main {
 }
 
 .speech-btn:hover {
-  background: var(--color-primary-hover);
+  background: linear-gradient(135deg, #FF8A65 0%, #FFC107 100%) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 138, 101, 0.4);
 }
 
 .speech-btn:focus-visible {
   outline: none;
-  box-shadow: var(--focus-ring);
+  box-shadow: 0 0 0 3px rgba(91, 181, 162, 0.3);
 }
 
 .speech-btn:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 .speech-btn.primary {
   padding: var(--space-12) var(--space-24);
   font-size: var(--font-size-lg);
+  background: linear-gradient(135deg, #5BB5A2 0%, #4DD0E1 100%) !important;
+}
+
+.speech-btn.primary:hover {
+  background: linear-gradient(135deg, #4DD0E1 0%, #80DEEA 100%) !important;
 }
 
 .speed-control {
@@ -1775,19 +1794,27 @@ main {
 textarea, input[type="url"], input[type="file"] {
   width: 100%;
   font-size: var(--font-size-lg);
-  color: var(--color-text) !important;
-  background: #ffba00;  /* Yellow input background */
-  border: 1px solid var(--color-border);
+  color: #2C3E50 !important;
+  background: #ffffff !important;  /* Clean white background */
+  border: 2px solid #E0E0E0 !important;
   border-radius: var(--radius-md);
   padding: var(--space-16);
   margin-bottom: var(--space-16);
-  transition: border-color var(--duration-fast) var(--ease-standard);
+  transition: all 0.3s ease;
   font-family: var(--font-family-base);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 textarea:focus, input:focus {
-  outline: var(--focus-outline);
-  border-color: var(--color-primary);
+  outline: none !important;
+  border-color: #5BB5A2 !important;
+  box-shadow: 0 0 0 3px rgba(91, 181, 162, 0.1), 0 2px 8px rgba(91, 181, 162, 0.2) !important;
+  background: #FAFAFA !important;
+}
+
+textarea::placeholder, input::placeholder {
+  color: #B0B0B0 !important;
+  opacity: 0.8;
 }
 
 textarea {
@@ -1798,6 +1825,23 @@ textarea {
 input[type="file"] {
   display: block;
   padding: var(--space-12);
+  cursor: pointer;
+}
+
+input[type="file"]::-webkit-file-upload-button {
+  background: linear-gradient(135deg, #5BB5A2 0%, #4DD0E1 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+input[type="file"]::-webkit-file-upload-button:hover {
+  background: linear-gradient(135deg, #FF8A65 0%, #FFC107 100%);
+  transform: translateY(-1px);
 }
 
 .center-btn {
@@ -1808,32 +1852,35 @@ input[type="file"] {
 button {
   padding: var(--space-16) var(--space-32);
   font-size: var(--font-size-xl);
-  background: var(--theme-secondary-accent);
-  color: var(--color-btn-primary-text) !important;
+  background: linear-gradient(135deg, #5BB5A2 0%, #4DD0E1 100%) !important;
+  color: #ffffff !important;
   border: none;
   border-radius: var(--radius-full);
   font-weight: var(--font-weight-bold);
   cursor: pointer;
-  transition: background-color var(--duration-fast) var(--ease-standard);
-  box-shadow: var(--shadow-lg);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 16px rgba(91, 181, 162, 0.4);
   text-transform: uppercase;
-  letter-spacing: var(--letter-spacing-tight);
+  letter-spacing: 0.5px;
   display: inline-block;
   font-family: var(--font-family-base);
 }
 
 button:hover {
-  background: #ff4040;  /* Lighter red hover */
+  background: linear-gradient(135deg, #4DD0E1 0%, #80DEEA 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(77, 208, 225, 0.5);
 }
 
 button:focus-visible {
   outline: none;
-  box-shadow: var(--focus-ring);
+  box-shadow: 0 0 0 3px rgba(91, 181, 162, 0.3);
 }
 
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  transform: none;
 }
 
 #genStatus {
@@ -1881,14 +1928,14 @@ button:disabled {
 }
 
 .mindmapContent h2 {
-  background: var(--theme-primary-accent);
-  color: var(--color-btn-primary-text) !important;
+  background: linear-gradient(135deg, #5BB5A2 0%, #4DD0E1 100%);
+  color: #ffffff !important;
   padding: var(--space-20);
   border-radius: var(--radius-lg);
   text-align: center !important;
   margin-bottom: var(--space-32);
   font-size: var(--font-size-3xl);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 4px 12px rgba(91, 181, 162, 0.3);
   font-family: var(--font-family-base);
   font-weight: var(--font-weight-bold);
 }
@@ -1902,21 +1949,24 @@ button:disabled {
 }
 
 .mindmapContent > ul > li {
-  background: var(--color-secondary);
-  border: 1px solid var(--color-border);
+  background: linear-gradient(135deg, rgba(91, 181, 162, 0.08) 0%, rgba(77, 208, 225, 0.08) 100%);
+  border: 2px solid #E0E0E0;
   border-radius: var(--radius-md);
   padding: var(--space-16);
   margin: 0;
   position: relative;
-  transition: background-color var(--duration-fast) var(--ease-standard);
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   min-height: fit-content;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .mindmapContent > ul > li:hover {
-  background: var(--color-secondary-hover);
+  background: linear-gradient(135deg, rgba(91, 181, 162, 0.15) 0%, rgba(77, 208, 225, 0.15) 100%);
+  border-color: #5BB5A2;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(91, 181, 162, 0.2);
 }
 
 .mindmapContent > ul > li::before {
@@ -1926,7 +1976,7 @@ button:disabled {
   top: var(--space-10);
   right: var(--space-10);
   left: auto;
-  color: var(--theme-secondary-accent);
+  color: #FFC107;
 }
 
 .mindmapContent > ul > li > ul {
@@ -1937,36 +1987,43 @@ button:disabled {
 }
 
 .mindmapContent > ul > li > ul > li {
-  background: var(--color-surface);
+  background: #ffffff;
   border-radius: var(--radius-sm);
   padding: var(--space-8) var(--space-12);
   margin: 0;
   font-size: var(--font-size-base);
-  border-left: var(--space-2) solid var(--theme-secondary-accent);
+  border-left: 3px solid #FF8A65;
   flex: none;
   width: 100%;
   word-wrap: break-word;
   overflow-wrap: break-word;
   line-height: var(--line-height-normal);
-  box-shadow: var(--shadow-xs);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.mindmapContent > ul > li > ul > li:hover {
+  border-left-color: #FFC107;
+  transform: translateX(4px);
 }
 
 .mindmapContent > ul > li > ul > li::before {
   content: "•";
   font-size: var(--font-size-sm);
   left: -5px;
-  color: var(--theme-secondary-accent);
+  color: #FF8A65;
 }
 
 .notesContent h3 {
   margin-top: var(--space-32);
   padding: var(--space-16);
-  background: var(--theme-primary-accent);
-  color: var(--color-btn-primary-text) !important;
+  background: linear-gradient(135deg, #FFC107 0%, #FF8A65 100%);
+  color: #ffffff !important;
   border-radius: var(--radius-base);
   text-align: center !important;
   font-family: var(--font-family-base);
   font-weight: var(--font-weight-bold);
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
 }
 
 .notesContent p {
@@ -1981,10 +2038,10 @@ button:disabled {
   font-weight: var(--font-weight-semibold);
   margin-top: var(--space-24);
   padding: var(--space-16);
-  background: var(--color-secondary);
-  border-left: var(--space-4) solid var(--theme-primary-accent);
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 138, 101, 0.1) 100%);
+  border-left: 4px solid #5BB5A2;
   border-radius: var(--radius-sm);
-  color: var(--color-text-secondary) !important;
+  color: #2C3E50 !important;
   text-align: left !important;
   font-family: var(--font-family-base);
 }
@@ -1998,17 +2055,20 @@ button:disabled {
 .quizContent li {
   padding: var(--space-8) var(--space-16);
   margin: var(--space-4) 0;
-  background: var(--color-surface);
+  background: #ffffff;
   border-radius: var(--radius-sm);
-  transition: background-color var(--duration-fast) var(--ease-standard);
-  color: var(--color-text-secondary) !important;
-  border: 1px solid var(--color-border);
+  transition: all 0.3s ease;
+  color: #2C3E50 !important;
+  border: 2px solid #E0E0E0;
   text-align: left !important;
   font-family: var(--font-family-base);
+  cursor: pointer;
 }
 
 .quizContent li:hover {
-  background: var(--color-secondary-hover);
+  background: linear-gradient(135deg, rgba(91, 181, 162, 0.1) 0%, rgba(77, 208, 225, 0.1) 100%);
+  border-color: #5BB5A2;
+  transform: translateX(4px);
 }
 
 .flashcard-deck {
@@ -2799,10 +2859,10 @@ html, body {
   display: none !important;
 }
 
-/* Update header to use dark blue */
+/* Update header to use gradient */
 .header {
-  background: #ff4040 !important;
-  border-bottom: 3px solid #000000 !important;
+  background: linear-gradient(135deg, #FFC107 0%, #FF8A65 100%) !important;
+  border-bottom: 3px solid #5BB5A2 !important;
 }
 
 .title-section h1 {
@@ -2813,25 +2873,7 @@ html, body {
   color: #ffd34d !important;
 }
 
-/* Navigation updates */
-.tab-btn:hover {
-  background: #ff4040 !important;  /* Lighter red hover */
-  color: #ffffff !important;  /* White text on orange */
-}
-
-.tab-btn.active {
-  background: #ff000d !important;
-  color: #ffffff !important;
-}
-
-/* Settings buttons */
-.right button {
-  background: #ff4040 !important;
-}
-
-.right button:hover {
-  background: #ff4040;  /* Lighter red hover */
-}
+/* Navigation updates - REMOVED OLD RED STYLES - Now using teal below */
 
 /* Update body background */
 body {
@@ -2857,12 +2899,14 @@ body {
   }
 }
 
-/* ===== CUSTOM COLOR OVERRIDES ===== */
+/* ===== CUSTOM COLOR OVERRIDES - MATCHING LANDING PAGE ===== */
+/* Landing page colors: Yellow (#FFC107), Teal (#5BB5A2), Orange (#FF8A65), Turquoise (#4DD0E1) */
 
-/* Header styling */
+/* Header styling - Gradient matching landing page */
 .header {
-  background: #ff000d !important;  /* Pure red header */  /* Pure red header */
-  border-bottom: 3px solid #000000 !important;  /* Black border */
+  background: linear-gradient(135deg, #FFC107 0%, #FF8A65 100%) !important;
+  border-bottom: 3px solid #5BB5A2 !important;  /* Teal accent */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Logo space */
@@ -2877,309 +2921,184 @@ body {
   height: 64px;
 }
 
-/* Tab styling */
+/* Tab styling - Clean white with colorful accents */
 .tab-btn {
-  background: #ffba00 !important;  /* Dark yellow tabs */
-  color: #000000 !important;  /* Black text */
+  background: #ffffff !important;
+  color: #2C3E50 !important;  /* Navy blue text */
   border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
 }
 
 .tab-btn:hover {
-  background: #ffd34d !important;  /* Light yellow hover */
-  color: #000000 !important;
+  background: #FFF9E6 !important;  /* Light yellow tint */
+  color: #FF8A65 !important;  /* Orange text */
+  border-bottom: 3px solid #FF8A65 !important;
 }
 
 .tab-btn.active {
-  background: #ff000d !important;  /* Pure red active tab */
-  color: #ffffff !important;  /* White text on red */
-  border-bottom-color: #000000 !important;
+  background: linear-gradient(135deg, #5BB5A2 0%, #4DD0E1 100%) !important;  /* Teal gradient */
+  color: #ffffff !important;
+  border-bottom-color: #2C3E50 !important;
 }
 
-/* Button styling */
+/* Button styling - Vibrant teal/orange */
 button {
-  background: #ff000d !important;  /* Red buttons */
+  background: linear-gradient(135deg, #5BB5A2 0%, #4DD0E1 100%) !important;
   color: #ffffff !important;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(91, 181, 162, 0.3) !important;
 }
 
 button:hover {
-  background: #ff4040;  /* Lighter red hover */
+  background: linear-gradient(135deg, #FF8A65 0%, #FFC107 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 138, 101, 0.4) !important;
 }
 
 /* Settings buttons specific */
-
-.right button:hover {
-  background: #ff4040;  /* Lighter red hover */
+.right button {
+  background: #5BB5A2 !important;
 }
 
-/* Input fields */
+.right button:hover {
+  background: #FF8A65 !important;
+}
+
+/* Input fields - Clean white with teal borders */
 input, textarea, select {
-  background-color: #7cccae !important;
-  border: 2px solid #000000 !important;  /* Black borders */
-  color: #000000 !important;
+  background-color: #ffffff !important;
+  border: 2px solid #E0E0E0 !important;
+  color: #2C3E50 !important;
+  transition: all 0.3s ease;
 }
 
 input:focus, textarea:focus, select:focus {
-  border-color: #ff000d !important;  /* Red focus */
-  box-shadow: 0 0 0 3px rgba(255, 0, 13, 0.2) !important;
+  border-color: #5BB5A2 !important;  /* Teal focus */
+  box-shadow: 0 0 0 3px rgba(91, 181, 162, 0.2) !important;
+  background-color: #FAFAFA !important;
 }
 
-/* Panels and cards */
+/* Panels and cards - Clean white with subtle shadow */
 .tab-panel {
-  background: #ffba00;  /* Dark yellow panel */
-  background: #ffba00 !important;  /* Dark yellow */
-  border: 1px solid #000000 !important;
-  color: #000000 !important;
+  background: #ffffff !important;
+  border: 1px solid #E0E0E0 !important;
+  color: #2C3E50 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
 }
 
-/* Modal */
+/* Modal - White with colorful border */
 .modal {
-  background: #ffba00;  /* Dark yellow modal */
-  border: 2px solid #000000 !important;
+  background: #ffffff !important;
+  border: 3px solid #5BB5A2 !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* Speech controls background */
 .speech-controls {
-  background: rgba(255, 186, 0, 0.3) !important;  /* Yellow tint */
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(91, 181, 162, 0.1) 100%) !important;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid #E0E0E0;
 }
 
-/* Main app background */
+/* Main app background - Light, clean with subtle gradient */
 .App {
-  background-color: #7cccae !important;  /* Green */
+  background: linear-gradient(180deg, #F5F9FC 0%, #EEF6F4 50%, #FFF9E6 100%) !important;
+  min-height: 100vh;
 }
 
 main {
-  background: #7cccae !important;  /* Green */
+  background: transparent !important;
 }
 
 body {
-  background-color: #7cccae !important;  /* Green */
+  background: linear-gradient(180deg, #F5F9FC 0%, #EEF6F4 50%, #FFF9E6 100%) !important;
+  background-attachment: fixed;
 }
 
-/* Flashcard colors */
+/* Flashcard colors - Matching landing page palette */
 .flashcard-front {
-  background: #ff000d !important;  /* Red */
+  background: linear-gradient(135deg, #FFC107 0%, #FF8A65 100%) !important;
 }
 
 .flashcard-back {
-  background: #ffba00 !important;  /* Yellow */
-  color: #000000 !important;
+  background: linear-gradient(135deg, #5BB5A2 0%, #4DD0E1 100%) !important;
+  color: #ffffff !important;
 }
 
-/* Links */
+/* Links - Teal accent */
 a {
-  color: #ff000d !important;  /* Red links */
+  color: #5BB5A2 !important;
 }
 
 a:hover {
-  color: #ff4040 !important;  /* Lighter red hover */
+  color: #FF8A65 !important;
 }
 
-/* 
-/* ===== FINAL COLOR SCHEME STYLES ===== */
-
-/* Logo space styling */
-.logo-space {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-8);
-}
-
-/* Ensure all buttons are red */
-button, .btn {
-  background: #ff000d !important;
-  color: #ffffff !important;
-}
-
-button:hover, .btn:hover {
-  background: #ff4040 !important;
-}
-
-/* Ensure all inputs have black borders and yellow background */
-input, textarea, select {
-  background: #ffba00 !important;
-  border: 2px solid #000000 !important;
-  color: #000000 !important;
-}
-
-input:focus, textarea:focus, select:focus {
-  border-color: #000000 !important;
-  box-shadow: 0 0 0 3px rgba(255, 0, 13, 0.2) !important;
-}
-
-/* Tab panels yellow background */
-.tab-panel {
-  background: #ffba00 !important;
-  color: #000000 !important;
-}
-
-/* Modal yellow background */
-.modal {
-  background: #ffba00 !important;
-  border: 2px solid #000000 !important;
-  color: #000000 !important;
-}
-
-/* Main content area green */
-main {
-  background: #7cccae !important;
-}
-
-/* Body green background */
-body {
-  background-color: #7cccae !important;
-}
-
-/* App container green */
-.App {
-  background-color: #7cccae !important;
-}
-
-/* Links red */
-a {
-  color: #ff000d !important;
-}
-
-a:hover {
-  color: #ff4040 !important;
-}
-
-/* All text black for readability */
-p, h1, h2, h3, h4, h5, h6, span, div, label {
-  color: #000000 !important;
-}
-
-/* White text only on colored backgrounds */
-.header *, 
-button *, 
-.tab-btn.active * {
-  color: #ffffff !important;
-}
-
-/* Tab specific colors */
-.tab-btn {
-  background: #ffba00 !important;
-  color: #000000 !important;
-}
-
-.tab-btn:hover {
-  background: #ff4040 !important;
-  color: #ffffff !important;
-}
-
-.tab-btn.active {
-  background: #ff000d !important;
-  color: #ffffff !important;
-}
-
-/* Settings buttons red */
-
-.right button:hover {
-  background: #ff4040 !important;
-}
-
-/* Speech controls */
-.speech-controls {
-  background: rgba(255, 186, 0, 0.3) !important;
-}
-
-.speech-btn {
-  background: #ff000d !important;
-}
-
-.speech-btn:hover {
-  background: #ff4040 !important;
-}
-
-/* Flashcards */
-.flashcard-front {
-  background: #ff000d !important;
-}
-
-.flashcard-back {
-  background: #ffba00 !important;
-  color: #000000 !important;
-}
-
-/* Success/Error/Warning status colors */
-.status-success {
-  background: rgba(124, 204, 174, 0.2) !important;
-  border: 1px solid #7cccae !important;
-}
-
-.status-error {
-  background: rgba(255, 0, 13, 0.2) !important;
-  border: 1px solid #ff000d !important;
-}
-
-.status-warning {
-  background: rgba(255, 186, 0, 0.2) !important;
-  border: 1px solid #ffba00 !important;
-}
-
-
-/* Header buttons specifically - RED */
-.header .right button,
-.header button[title="Settings"],
-.header button[title="Switch Color Scheme"] {
-  background: #ff4b54 !important;  /* Red header buttons */
-  color: #ffffff !important;
-}
-
-.header .right button:hover,
-.header button[title="Settings"]:hover,
-.header button[title="Switch Color Scheme"]:hover {
-  background: #ff7c83 !important;  /* Lighter red hover */
-  color: #ffffff !important;
-}
+/* OLD RED STYLES REMOVED - Using teal/yellow theme defined above */
 
 /* ADD THIS TO THE END OF YOUR App.css FILE */
 
 /* EMERGENCY VISIBILITY FIXES */
 .content-display {
   background: #ffffff !important;
-  color: #000000 !important;
-  padding: 20px !important;
+  color: #2C3E50 !important;
+  padding: 24px !important;
   min-height: 200px !important;
+  border-radius: 8px;
 }
 
 .content-display * {
-  color: #000000 !important;
+  color: #2C3E50 !important;
 }
 
 .content-display h1, 
 .content-display h2, 
 .content-display h3 {
-  color: #000000 !important;
+  color: #2C3E50 !important;
   margin: 20px 0 10px 0 !important;
+  font-weight: 600 !important;
+}
+
+.content-display h2 {
+  color: #5BB5A2 !important;
+  border-bottom: 3px solid #FFC107;
+  padding-bottom: 8px;
 }
 
 .content-display p {
-  color: #000000 !important;
+  color: #2C3E50 !important;
   margin: 10px 0 !important;
+  line-height: 1.6 !important;
 }
 
 .content-display ul,
 .content-display ol {
-  color: #000000 !important;
+  color: #2C3E50 !important;
   margin: 10px 0 !important;
   padding-left: 30px !important;
 }
 
 .content-display li {
-  color: #000000 !important;
+  color: #2C3E50 !important;
   margin: 5px 0 !important;
+}
+
+.content-display strong {
+  color: #FF8A65 !important;
 }
 
 /* Force all tab panels to show content clearly */
 .tab-panel.active {
   display: block !important;
-  background: #ffba00 !important;
-  color: #000000 !important;
+  background: #ffffff !important;
+  color: #2C3E50 !important;
 }
 
-/* Loading spinner visibility */
+/* Loading spinner visibility - with landing page colors */
 .loading-spinner {
   display: block !important;
   margin: 0 auto !important;
+  border: 4px solid #E0E0E0;
+  border-top: 4px solid #5BB5A2;
 }

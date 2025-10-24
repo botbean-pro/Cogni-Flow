@@ -23,11 +23,13 @@ try {
 }
 
 // Gemini API configuration
-const apiKey = "AIzaSyAaiJHfFeKRrF8Wy5rqUCwhN2l3-EEi-2Q";
+// ⚠️ IMPORTANT: If you get 404 errors, your API key may be invalid/expired.
+// Get a new key at: https://makersuite.google.com/app/apikey
+// Consider using environment variables for better security in production.
+const apiKey = "AIzaSyAaiJHfFeKRrF8Wy5rqUCwhN2l3-EEi-2Q"; 
 const API_ENDPOINTS = [
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`,
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`, // Fallback to 1.5-pro if 2.5-flash fails
 ];
 
 export default function App() {
@@ -108,9 +110,9 @@ export default function App() {
     // CRITICAL: Remove AI explanations that appear after the HTML
     // Find where actual HTML content ends (after closing </html>, </div>, or </body>)
     const htmlEndPatterns = [
-      /<\/html>\s*/i,
-      /<\/body>\s*/i,
-      /<\/div>\s*$/i
+      new RegExp("<\\/html>\\s*", "i"),
+      new RegExp("<\\/body>\\s*", "i"),
+      new RegExp("<\\/div>\\s*$", "i")
     ];
     
     for (const pattern of htmlEndPatterns) {
@@ -141,42 +143,30 @@ export default function App() {
     return cleaned;
   };
 
-  const extractTextFromHtml = (htmlString) => {
+  const extractTextFromContent = (htmlContent) => {
     const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = htmlString;
-
-    const unwantedTags = [
-      "script", "style", "nav", "header", "footer", "aside", 
-      "noscript", "iframe", "object", "embed"
-    ];
-    unwantedTags.forEach((tag) => {
-      const elements = tempDiv.getElementsByTagName(tag);
-      for (let i = elements.length - 1; i >= 0; i--) {
-        elements[i].remove();
-      }
-    });
-
-    let content = "";
-    const mainSelectors = [
-      "main", "article", "[role='main']", ".content",
-      "#content", ".post", ".article", ".entry-content"
-    ];
-
-    for (const selector of mainSelectors) {
-      const element = tempDiv.querySelector(selector);
-      if (element && element.textContent.trim().length > content.length) {
-        content = element.textContent.trim();
-      }
-    }
-
-    if (!content || content.length < 100) {
-      content = tempDiv.textContent || tempDiv.innerText || "";
-    }
-
-    return content.replace(/\s+/g, " ").trim();
+    tempDiv.innerHTML = htmlContent;
+    
+    // Remove script and style elements
+    const scripts = tempDiv.querySelectorAll('script, style');
+    scripts.forEach(script => script.remove());
+    
+    // Get text content
+    let text = tempDiv.textContent || tempDiv.innerText || "";
+    
+    // Clean up whitespace
+    text = text.replace(/\s+/g, ' ').trim();
+    
+    console.log("📝 Extracted text for speech:", text.substring(0, 200) + "...");
+    console.log("📊 Total text length:", text.length);
+    
+    return text;
   };
 
   const fetchUrlContent = async (url) => {
+    console.log("🔍 Attempting to fetch URL:", url);
+    
+    // Try direct fetch first
     try {
       const directResponse = await fetch(url, {
         mode: "cors",
@@ -187,23 +177,28 @@ export default function App() {
       });
       if (directResponse.ok) {
         const textContent = await directResponse.text();
-        const extractedContent = extractTextFromHtml(textContent);
+        const extractedContent = extractTextFromContent(textContent);
+        console.log("✅ Direct fetch successful, extracted length:", extractedContent?.length);
         if (extractedContent && extractedContent.length > 100) return extractedContent;
       }
     } catch (error) {
-      console.log("Direct fetch failed:", error);
+      console.log("⚠️ Direct fetch failed (expected for most sites):", error.message);
     }
     
+    // Try multiple proxy services
     const proxies = [
-      "https://api.allorigins.win/get?url=", 
-      "https://thingproxy.freeboard.io/fetch/"
+      { name: "AllOrigins", url: "https://api.allorigins.win/get?url=", type: "allorigins" },
+      { name: "CORS Anywhere (Heroku)", url: "https://cors-anywhere.herokuapp.com/", type: "direct" },
+      { name: "ThingProxy", url: "https://thingproxy.freeboard.io/fetch/", type: "direct" },
     ];
     
     for (const proxy of proxies) {
       try {
-        const proxyUrl = proxy.includes("allorigins") 
-          ? proxy + encodeURIComponent(url) 
-          : proxy + url;
+        console.log(`🔄 Trying ${proxy.name}...`);
+        const proxyUrl = proxy.type === "allorigins" 
+          ? proxy.url + encodeURIComponent(url) 
+          : proxy.url + url;
+          
         const response = await fetch(proxyUrl, {
           method: "GET",
           headers: {
@@ -211,10 +206,14 @@ export default function App() {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
           },
         });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        if (!response.ok) {
+          console.log(`❌ ${proxy.name} returned status ${response.status}`);
+          throw new Error(`HTTP ${response.status}`);
+        }
         
         let responseData;
-        if (proxy.includes("allorigins")) {
+        if (proxy.type === "allorigins") {
           const jsonResponse = await response.json();
           responseData = jsonResponse.contents;
         } else {
@@ -222,14 +221,19 @@ export default function App() {
         }
         
         if (responseData) {
-          const extractedContent = extractTextFromHtml(responseData);
-          if (extractedContent && extractedContent.length > 50) return extractedContent;
+          const extractedContent = extractTextFromContent(responseData);
+          console.log(`✅ ${proxy.name} successful! Extracted ${extractedContent?.length} characters`);
+          if (extractedContent && extractedContent.length > 50) {
+            return extractedContent;
+          }
         }
       } catch (error) {
-        console.log(`Proxy ${proxy} failed:`, error);
+        console.log(`❌ ${proxy.name} failed:`, error.message);
       }
     }
-    throw new Error("Failed to fetch content from URL");
+    
+    console.error("💥 All proxy attempts failed");
+    throw new Error("Unable to fetch content from URL. This may be due to website restrictions. Please copy and paste the article text directly into the text box instead.");
   };
 
   const handleFileChange = async (e) => {
@@ -249,6 +253,8 @@ export default function App() {
 
   const callGeminiAPI = async (endpoint, prompt) => {
     console.log("🔄 Calling Gemini API...");
+    console.log("📍 Endpoint:", endpoint.split('?')[0]); // Log without API key
+    
     const response = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -264,9 +270,19 @@ export default function App() {
     });
     
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ API Error:", response.status, errorText);
-      throw new Error(`API failed: ${response.status}`);
+      let errorText = await response.text();
+      let errorDetails = "";
+      
+      try {
+        const errorJson = JSON.parse(errorText);
+        errorDetails = errorJson.error?.message || errorText;
+        console.error("❌ API Error Response:", errorJson);
+      } catch {
+        errorDetails = errorText.substring(0, 200);
+        console.error("❌ API Error:", response.status, errorText);
+      }
+      
+      throw new Error(`API failed: ${response.status} - ${errorDetails}`);
     }
     
     const data = await response.json();
@@ -304,7 +320,12 @@ export default function App() {
           }
           setTextInput(sourceText);
         } catch (urlError) {
-          showErrorDialog("Failed to fetch URL. Please paste the text directly instead.");
+          console.error("URL fetch error:", urlError);
+          showErrorDialog(
+            "Unable to fetch content from this URL. " +
+            "This can happen due to website security restrictions (CORS policy). " +
+            "\n\n✅ Solution: Please copy the article text from the website and paste it directly into the text box above, then click Generate again."
+          );
           setIsGenerating(false);
           setGenStatus("");
           return;
@@ -382,6 +403,8 @@ export default function App() {
                 setFlashcardContent(cleanedResponse);
                 console.log("✅ Flashcard content SET successfully");
                 break;
+              default:
+                break;
             }
             
             success = true;
@@ -396,7 +419,18 @@ export default function App() {
         }
         
         if (!success) {
-          throw new Error(`Failed to generate ${type}. Error: ${lastError?.message || 'Unknown error'}`);
+          const errorMsg = lastError?.message || 'Unknown error';
+          if (errorMsg.includes('404') || errorMsg.includes('not found')) {
+            throw new Error(
+              `API Key Error: Your Google Gemini API key appears to be invalid or expired.\n\n` +
+              `🔧 How to fix:\n` +
+              `1. Go to: https://makersuite.google.com/app/apikey\n` +
+              `2. Create a new API key\n` +
+              `3. Replace the key in App.js (line 28)\n\n` +
+              `Technical details: ${errorMsg}`
+            );
+          }
+          throw new Error(`Failed to generate ${type}. Error: ${errorMsg}`);
         }
         
         // Small delay between content types
@@ -426,16 +460,25 @@ export default function App() {
     currentUtteranceRef.current = null;
   };
 
-  const extractTextFromContent = (htmlContent) => {
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = htmlContent;
-    const text = tempDiv.textContent || tempDiv.innerText || "";
-    return text.trim();
-  };
-
   const splitIntoSentences = (text) => {
-    const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
-    return sentences.map((s) => s.trim()).filter((s) => s.length > 0);
+    if (!text || text.length === 0) {
+      console.error("❌ No text to split into sentences");
+      return [];
+    }
+    
+    // Split by sentence-ending punctuation followed by space or end of string
+    // This regex handles: . ! ? followed by space/newline/end
+    const sentences = text.match(/[^.!?]+[.!?]+(?:\s+|$)/g) || [];
+    
+    // Clean up sentences
+    const cleanedSentences = sentences
+      .map((s) => s.trim())
+      .filter((s) => s.length > 3); // Filter out very short "sentences"
+    
+    console.log("🔊 Split into", cleanedSentences.length, "sentences");
+    cleanedSentences.slice(0, 5).forEach((s, i) => console.log(`  [${i}] "${s}"`)); // Log first 5 sentences
+    
+    return cleanedSentences;
   };
 
   const initializeSpeech = () => {
@@ -460,47 +503,85 @@ export default function App() {
   const speakCurrentSentence = () => {
     const sentences = speechSentencesRef.current;
     const index = currentSentenceIndex;
+    
+    console.log(`🔊 Speaking sentence ${index + 1}/${sentences.length}`);
+    
     if (index >= sentences.length) {
+      console.log("✅ Finished reading all sentences");
       resetSpeechControls();
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(sentences[index]);
+    
+    const sentenceText = sentences[index];
+    console.log(`📢 Current sentence: "${sentenceText.substring(0, 50)}..."`);
+    
+    // Don't cancel speech here, it will be handled by the playback controls
+    // window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(sentenceText);
     utterance.rate = speechSpeed;
     utterance.pitch = 1;
     utterance.volume = 1;
+    
     utterance.onend = () => {
+      console.log(`✅ Finished sentence ${index + 1}`);
       setCurrentSentenceIndex((prevIndex) => {
         const newIndex = prevIndex + 1;
+        console.log(`⏭️ Moving to sentence ${newIndex + 1}`);
         if (newIndex < sentences.length) {
-          setTimeout(speakCurrentSentence, 100);
+          // Only speak next if not paused or stopped externally
+          if (isPlaying) {
+            setTimeout(() => speakCurrentSentence(), 100); 
+          }
         } else {
+          console.log("🎉 All sentences completed");
           resetSpeechControls();
         }
         return newIndex;
       });
     };
+    
     utterance.onerror = (event) => {
-      console.error("Speech error:", event);
+      console.error("❌ Speech error:", event);
       resetSpeechControls();
     };
+    
     currentUtteranceRef.current = utterance;
     window.speechSynthesis.speak(utterance);
   };
 
   const handlePlay = () => {
+    console.log("▶️ Play button clicked");
+    
     if (isPlaying && !isPaused) {
+      console.log("⏹️ Stopping playback");
+      window.speechSynthesis.cancel(); // Explicitly cancel here when stopping
       resetSpeechControls();
       return;
     }
+    
     if (isPaused) {
+      console.log("▶️ Resuming playback");
       window.speechSynthesis.resume();
       setIsPaused(false);
       setIsPlaying(true);
       return;
     }
-    if (!initializeSpeech()) return;
+    
+    console.log("🎬 Starting fresh playback");
+    window.speechSynthesis.cancel(); // Cancel any existing speech before starting new
+    resetSpeechControls();
+    
+    if (!initializeSpeech()) {
+      console.error("❌ Speech initialization failed");
+      return;
+    }
+    
+    console.log("✅ Speech initialized, starting playback");
     setIsPlaying(true);
-    speakCurrentSentence();
+    setCurrentSentenceIndex(0); 
+    
+    setTimeout(() => speakCurrentSentence(), 100);
   };
 
   const handlePause = () => {
@@ -591,8 +672,17 @@ export default function App() {
               type="url"
               value={urlInput}
               onChange={(e) => setUrlInput(e.target.value)}
-              placeholder="Paste a public article link here"
+              placeholder="Paste a public article link here (e.g., Medium, Wikipedia, news articles)"
             />
+            <p style={{ 
+              fontSize: '14px', 
+              color: '#666', 
+              marginTop: '8px', 
+              fontStyle: 'italic',
+              textAlign: 'center'
+            }}>
+              💡 Tip: If URL fetching doesn't work, copy the article text and paste it in the text box above
+            </p>
             <div className="center-btn">
               <button onClick={handleGenerate} disabled={isGenerating}>
                 {isGenerating ? "⏳ Generating..." : "🚀 Generate Learning Materials"}
