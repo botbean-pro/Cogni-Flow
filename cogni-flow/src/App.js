@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import "./App.css";
 
 // Firebase Configuration
@@ -61,6 +61,7 @@ export default function App() {
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
   const speechSentencesRef = useRef([]);
   const currentUtteranceRef = useRef(null);
+  const endFallbackTimerRef = useRef(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("cogniSet");
@@ -78,6 +79,19 @@ export default function App() {
   useEffect(() => {
     document.body.setAttribute("data-theme", theme);
   }, [theme]);
+
+  const resetSpeechControls = useCallback(() => {
+    window.speechSynthesis.cancel();
+    if (endFallbackTimerRef.current) {
+      clearTimeout(endFallbackTimerRef.current);
+      endFallbackTimerRef.current = null;
+    }
+    setIsPlaying(false);
+    setIsPaused(false);
+    setCurrentSentenceIndex(0);
+    speechSentencesRef.current = [];
+    currentUtteranceRef.current = null;
+  }, []);
 
   const showErrorDialog = (msg, err) => {
     console.error(msg, err || "");
@@ -165,17 +179,42 @@ export default function App() {
     tempDiv.innerHTML = htmlContent;
     
     // Remove script and style elements
-    const scripts = tempDiv.querySelectorAll('script, style');
-    scripts.forEach(script => script.remove());
+    tempDiv.querySelectorAll('script, style').forEach(el => el.remove());
+
+    function walk(node, builder) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            builder.push(node.nodeValue);
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            const tagName = node.tagName.toUpperCase();
+            
+            // Add space before block elements for separation
+            if (['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'DIV', 'BLOCKQUOTE', 'BR', 'TR'].includes(tagName)) {
+                builder.push(' ');
+            }
+
+            for (let child of node.childNodes) {
+                walk(child, builder);
+            }
+            
+            // Add sentence break after block elements
+            if (['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'DIV', 'BLOCKQUOTE', 'BR', 'TR'].includes(tagName)) {
+                builder.push('. ');
+            }
+        }
+    }
+
+    const textParts = [];
+    walk(tempDiv, textParts);
+    let text = textParts.join('');
     
-    // Get text content
-    let text = tempDiv.textContent || tempDiv.innerText || "";
+    // Clean up whitespace, multiple periods, and other noise
+    text = text.replace(/\s+/g, ' ').replace(/\s*(\.\s*)+/g, '. ').trim();
     
-    // Clean up whitespace
-    text = text.replace(/\s+/g, ' ').trim();
-    
-    console.log("📝 Extracted text for speech:", text.substring(0, 200) + "...");
+    console.log("📝 Extracted text for speech:", text.substring(0, 300) + "...");
     console.log("📊 Total text length:", text.length);
+    console.log("--- FULL EXTRACTED TEXT ---");
+    console.log(text);
+    console.log("--- END FULL EXTRACTED TEXT ---");
     
     return text;
   };
@@ -474,33 +513,41 @@ export default function App() {
     }
   };
 
-  const resetSpeechControls = () => {
-    window.speechSynthesis.cancel();
-    setIsPlaying(false);
-    setIsPaused(false);
-    setCurrentSentenceIndex(0);
-    speechSentencesRef.current = [];
-    currentUtteranceRef.current = null;
-  };
-
   const splitIntoSentences = (text) => {
     if (!text || text.length === 0) {
       console.error("❌ No text to split into sentences");
       return [];
     }
     
-    // Split by sentence-ending punctuation followed by space or end of string
-    // This regex handles: . ! ? followed by space/newline/end
+    // Split by sentence-ending punctuation. The previous step should have added periods.
+    // This regex handles sentences ending with . ! ? and followed by space or end of string.
     const sentences = text.match(/[^.!?]+[.!?]+(?:\s+|$)/g) || [];
     
-    // Clean up sentences
+    const chunkByLength = (str, limit = 220) => {
+      const chunks = [];
+      let remaining = str.trim();
+      while (remaining.length > limit) {
+        let cut = remaining.lastIndexOf(' ', limit);
+        if (cut < 80) cut = limit; // avoid tiny trailing chunk
+        chunks.push(remaining.slice(0, cut).trim());
+        remaining = remaining.slice(cut).trim();
+      }
+      if (remaining) chunks.push(remaining);
+      return chunks;
+    };
+
     const cleanedSentences = sentences
+      .flatMap((s) => chunkByLength(s))
       .map((s) => s.trim())
-      .filter((s) => s.length > 3); // Filter out very short "sentences"
+      .filter((s) => s.length > 3); // Filter out very short fragments
     
     console.log("🔊 Split into", cleanedSentences.length, "sentences");
-    cleanedSentences.slice(0, 5).forEach((s, i) => console.log(`  [${i}] "${s}"`)); // Log first 5 sentences
+    cleanedSentences.slice(0, 5).forEach((s, i) => console.log(`  [${i}] "${s}"`));
     
+    console.log("--- FULL SENTENCES ARRAY ---");
+    console.log(JSON.stringify(cleanedSentences, null, 2));
+    console.log("--- END FULL SENTENCES ARRAY ---");
+
     return cleanedSentences;
   };
 
@@ -523,62 +570,67 @@ export default function App() {
     return true;
   };
 
-  const speakCurrentSentence = () => {
+  const proceedToNext = useCallback(() => {
+    if (endFallbackTimerRef.current) {
+      clearTimeout(endFallbackTimerRef.current);
+      endFallbackTimerRef.current = null;
+    }
+    setCurrentSentenceIndex(i => i + 1);
+  }, []);
+
+  const speakCurrentSentence = useCallback(() => {
     const sentences = speechSentencesRef.current;
     const index = currentSentenceIndex;
-    
-    console.log(`🔊 Speaking sentence ${index + 1}/${sentences.length}`);
-    
+
     if (index >= sentences.length) {
-      console.log("✅ Finished reading all sentences");
+      console.log("🎉 All sentences completed");
       resetSpeechControls();
       return;
     }
-    
-    const sentenceText = sentences[index];
-    console.log(`📢 Current sentence: "${sentenceText.substring(0, 50)}..."`);
-    
-    // Don't cancel speech here, it will be handled by the playback controls
-    // window.speechSynthesis.cancel();
 
+    const sentenceText = sentences[index];
+    console.log(`🔊 Speaking sentence ${index + 1}/${sentences.length}: "${sentenceText.substring(0, 50)}..."`);
+    
     const utterance = new SpeechSynthesisUtterance(sentenceText);
     utterance.rate = speechSpeed;
     utterance.pitch = 1;
     utterance.volume = 1;
     
-    utterance.onend = () => {
-      console.log(`✅ Finished sentence ${index + 1}`);
-      setCurrentSentenceIndex((prevIndex) => {
-        const newIndex = prevIndex + 1;
-        console.log(`⏭️ Moving to sentence ${newIndex + 1}`);
-        if (newIndex < sentences.length) {
-          // Only speak next if not paused or stopped externally
-          if (isPlaying) {
-            setTimeout(() => speakCurrentSentence(), 100); 
-          }
-        } else {
-          console.log("🎉 All sentences completed");
-          resetSpeechControls();
-        }
-        return newIndex;
-      });
-    };
+    utterance.onend = proceedToNext;
     
     utterance.onerror = (event) => {
       console.error("❌ Speech error:", event);
-      resetSpeechControls();
+      proceedToNext();
     };
     
     currentUtteranceRef.current = utterance;
     window.speechSynthesis.speak(utterance);
-  };
+
+    // Fallback in case onend doesn't fire on some platforms
+    const estimatedMs = Math.max(1500, (sentenceText.length / 15) * 1000 / speechSpeed);
+    if (endFallbackTimerRef.current) clearTimeout(endFallbackTimerRef.current);
+    endFallbackTimerRef.current = setTimeout(() => {
+      console.warn("⏱️ Fallback advancing to next sentence");
+      proceedToNext();
+    }, estimatedMs + 500);
+  }, [currentSentenceIndex, speechSpeed, resetSpeechControls, proceedToNext]);
+
+  useEffect(() => {
+    if (isPlaying && !isPaused) {
+      speakCurrentSentence();
+    } else {
+      window.speechSynthesis.cancel();
+      if (endFallbackTimerRef.current) {
+        clearTimeout(endFallbackTimerRef.current);
+      }
+    }
+  }, [currentSentenceIndex, isPlaying, isPaused, speakCurrentSentence]);
 
   const handlePlay = () => {
     console.log("▶️ Play button clicked");
     
     if (isPlaying && !isPaused) {
       console.log("⏹️ Stopping playback");
-      window.speechSynthesis.cancel(); // Explicitly cancel here when stopping
       resetSpeechControls();
       return;
     }
@@ -592,19 +644,21 @@ export default function App() {
     }
     
     console.log("🎬 Starting fresh playback");
-    window.speechSynthesis.cancel(); // Cancel any existing speech before starting new
-    resetSpeechControls();
+    window.speechSynthesis.cancel(); 
     
-    if (!initializeSpeech()) {
-      console.error("❌ Speech initialization failed");
-      return;
+    // If we're starting from scratch or re-starting, re-init
+    if (currentSentenceIndex === 0) {
+      if (!initializeSpeech()) {
+        console.error("❌ Speech initialization failed");
+        resetSpeechControls();
+        return;
+      }
     }
     
     console.log("✅ Speech initialized, starting playback");
     setIsPlaying(true);
-    setCurrentSentenceIndex(0); 
-    
-    setTimeout(() => speakCurrentSentence(), 100);
+    setIsPaused(false);
+    // The useEffect will now trigger the speech.
   };
 
   const handlePause = () => {
@@ -654,7 +708,7 @@ export default function App() {
     <div className="App" data-theme={theme}>
       <div className="main-image-header">
         <img 
-          src="/Main-Image.png" 
+          src="/Main-Image.gif" 
           alt="Cogni-Flow Main Visual" 
           className="main-header-image" 
         />
@@ -928,14 +982,16 @@ export default function App() {
               />
             </div>
             <div className="form-row">
-              <label htmlFor="bionicToggle">Bionic Reading</label>
               <p className="form-help">Emphasize the beginning of words to aid scanning.</p>
-              <input
-                id="bionicToggle"
-                type="checkbox"
-                checked={settings.bionic}
-                onChange={(e) => setSettings({ ...settings, bionic: e.target.checked})}
-              />
+              <label htmlFor="bionicToggle" className="checkbox-inline">
+                <input
+                  id="bionicToggle"
+                  type="checkbox"
+                  checked={settings.bionic}
+                  onChange={(e) => setSettings({ ...settings, bionic: e.target.checked})}
+                />
+                Bionic Reading
+              </label>
             </div>
             <div className="actions">
               <button onClick={() => setShowSettings(false)}>Close</button>
