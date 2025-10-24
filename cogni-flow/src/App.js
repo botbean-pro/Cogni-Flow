@@ -857,29 +857,42 @@ export default function App() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <h2>⚙️ Settings</h2>
             <div className="form-row">
-              <label>Font Size: {settings.fontSize}px</label>
-              <input 
-                type="range" 
-                min="12" 
-                max="24" 
-                value={settings.fontSize} 
-                onChange={(e) => setSettings({ ...settings, fontSize: parseInt(e.target.value) })} 
+              <label htmlFor="fsRange">Font Size: {settings.fontSize}px</label>
+              <p className="form-help">Controls the size of text in generated materials.</p>
+              <input
+                id="fsRange"
+                type="range"
+                min="12"
+                max="24"
+                value={settings.fontSize}
+                onChange={(e) => setSettings({ ...settings, fontSize: parseInt(e.target.value) })}
               />
             </div>
             <div className="form-row">
-              <label>Font Family</label>
+              <label htmlFor="ffSelect">Font Family</label>
+              <p className="form-help">Pick a comfortable reading font.</p>
               <select 
+                id="ffSelect"
                 value={settings.fontFamily} 
                 onChange={(e) => setSettings({ ...settings, fontFamily: e.target.value })}
               >
                 <option>Lexend, Arial, sans-serif</option>
                 <option>Inter, Arial, sans-serif</option>
+                <option>Helvetica Neue, Helvetica, Arial, sans-serif</option>
+                <option>Roboto, Arial, sans-serif</option>
+                <option>Source Sans 3, Inter, Arial, sans-serif</option>
+                <option>Atkinson Hyperlegible, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif</option>
+                <option>Verdana, Geneva, sans-serif</option>
+                <option>Georgia, Times New Roman, serif</option>
+                <option>Merriweather, Georgia, serif</option>
                 <option>OpenDyslexic, Arial, sans-serif</option>
               </select>
             </div>
             <div className="form-row">
-              <label>Text Align</label>
+              <label htmlFor="taSelect">Text Align</label>
+              <p className="form-help">Choose how paragraphs align across the page.</p>
               <select 
+                id="taSelect"
                 value={settings.textAlign} 
                 onChange={(e) => setSettings({ ...settings, textAlign: e.target.value })}
               >
@@ -889,36 +902,40 @@ export default function App() {
               </select>
             </div>
             <div className="form-row">
-              <label>Line Height: {settings.lineHeight}</label>
-              <input 
-                type="range" 
-                min="1.2" 
-                max="2.5" 
-                step="0.1" 
-                value={settings.lineHeight} 
-                onChange={(e) => setSettings({ ...settings, lineHeight: parseFloat(e.target.value) })} 
+              <label htmlFor="lhRange">Line Height: {settings.lineHeight}</label>
+              <p className="form-help">Adjust vertical spacing between lines for readability.</p>
+              <input
+                id="lhRange"
+                type="range"
+                min="1.2"
+                max="2.5"
+                step="0.1"
+                value={settings.lineHeight}
+                onChange={(e) => setSettings({ ...settings, lineHeight: parseFloat(e.target.value) })}
               />
             </div>
             <div className="form-row">
-              <label>Letter Spacing: {settings.letterSpacing}px</label>
-              <input 
-                type="range" 
-                min="0" 
-                max="3" 
-                step="0.1" 
-                value={settings.letterSpacing} 
-                onChange={(e) => setSettings({ ...settings, letterSpacing: parseFloat(e.target.value) })} 
+              <label htmlFor="lsRange">Letter Spacing: {settings.letterSpacing}px</label>
+              <p className="form-help">Adjust horizontal spacing between characters.</p>
+              <input
+                id="lsRange"
+                type="range"
+                min="0"
+                max="3"
+                step="0.1"
+                value={settings.letterSpacing}
+                onChange={(e) => setSettings({ ...settings, letterSpacing: parseFloat(e.target.value) })}
               />
             </div>
             <div className="form-row">
-              <label>
-                <input 
-                  type="checkbox" 
-                  checked={settings.bionic} 
-                  onChange={(e) => setSettings({ ...settings, bionic: e.target.checked})} 
-                />
-                Bionic Reading
-              </label>
+              <label htmlFor="bionicToggle">Bionic Reading</label>
+              <p className="form-help">Emphasize the beginning of words to aid scanning.</p>
+              <input
+                id="bionicToggle"
+                type="checkbox"
+                checked={settings.bionic}
+                onChange={(e) => setSettings({ ...settings, bionic: e.target.checked})}
+              />
             </div>
             <div className="actions">
               <button onClick={() => setShowSettings(false)}>Close</button>
