@@ -1,25 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
 import "./App.css";
 
-// Add Google Fonts link for Libre Franklin
-if (!document.querySelector('link[href*="Libre+Franklin"]')) {
-  const link = document.createElement('link');
-  link.href = 'https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&display=swap';
-  link.rel = 'stylesheet';
-  document.head.appendChild(link);
-}
+// Firebase Configuration
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 
-// Firebase Configuration - SECURITY NOTE: Move to environment variables
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || "AIzaSyDyy8AM0mc9oLi8ixywP4qo2dpJp2TYG6o",
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || "cogni-flow-d41db.firebaseapp.com",
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || "cogni-flow-d41db",
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || "cogni-flow-d41db.firebasestorage.app",
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID || "812584499671",
-  appId: process.env.REACT_APP_FIREBASE_APP_ID || "1:812584499671:web:14516059d67a937ec47392",
-  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID || "G-5W2RWBEHLE",
+  apiKey: "AIzaSyDyy8AM0mc9oLi8ixywP4qo2dpJp2TYG6o",
+  authDomain: "cogni-flow-d41db.firebaseapp.com",
+  projectId: "cogni-flow-d41db",
+  storageBucket: "cogni-flow-d41db.firebasestorage.app",
+  messagingSenderId: "812584499671",
+  appId: "1:812584499671:web:14516059d67a937ec47392",
+  measurementId: "G-5W2RWBEHLE",
 };
 
 try {
@@ -29,24 +22,17 @@ try {
   console.log("Firebase init error:", e);
 }
 
-// Gemini API configuration - SECURITY NOTE: Move to environment variable
-const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "AIzaSyAaiJHfFeKRrF8Wy5rqUCwhN2l3-EEi-2Q";
+// Gemini API configuration
+const apiKey = "AIzaSyAaiJHfFeKRrF8Wy5rqUCwhN2l3-EEi-2Q";
 const API_ENDPOINTS = [
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-latest:generateContent?key=${apiKey}`,
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`,
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${apiKey}`,
 ];
 
 export default function App() {
   const [activeTab, setActiveTab] = useState("input");
   const [theme, setTheme] = useState("scheme1");
-<<<<<<< HEAD
-=======
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [animationComplete, setAnimationComplete] = useState(false);
-
-  // Inputs
->>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
   const [textInput, setTextInput] = useState("");
   const [urlInput, setUrlInput] = useState("");
   const [fileInput, setFileInput] = useState(null);
@@ -59,7 +45,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [settings, setSettings] = useState({
     fontSize: 16,
-    fontFamily: "Libre Franklin, sans-serif",
+    fontFamily: "Lexend, Arial, sans-serif",
     textAlign: "left",
     lineHeight: 1.5,
     letterSpacing: 0,
@@ -74,24 +60,6 @@ export default function App() {
   const speechSentencesRef = useRef([]);
   const currentUtteranceRef = useRef(null);
 
-<<<<<<< HEAD
-=======
-  // Home page scroll animation
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const progress = Math.min(scrollTop / (window.innerHeight * 0.8), 1);
-      setScrollProgress(progress);
-      const bg = document.querySelector(".front-bg");
-      if (bg) bg.style.transform = `translateY(${scrollTop *0.4}px)`;
-      if (progress > 0.8 && !animationComplete) setAnimationComplete(true);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [animationComplete]);
-
-  // Load settings from localStorage
->>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
   useEffect(() => {
     const saved = localStorage.getItem("cogniSet");
     if (saved) setSettings(JSON.parse(saved));
@@ -115,97 +83,71 @@ export default function App() {
     setShowError(true);
   };
 
-  // YOUR CLEAN HTML RESPONSE FUNCTION
   const cleanHtmlResponse = (response) => {
-    if (!response) return "";
-    let cleanedResponse = response;
-
-<<<<<<< HEAD
-    // Remove HTML code block markers
-    cleanedResponse = cleanedResponse.replace(/```html/g, "");
-    cleanedResponse = cleanedResponse.replace(/```/g, "");
-
-    // Remove quotes at start and end
-    while (
-      cleanedResponse.startsWith('"') ||
-      cleanedResponse.startsWith("'") ||
-      cleanedResponse.startsWith("`")
-    ) {
-      cleanedResponse = cleanedResponse.substring(1);
+    if (!response) {
+      console.error("❌ Empty response received");
+      return "";
     }
-    while (
-      cleanedResponse.endsWith('"') ||
-      cleanedResponse.endsWith("'") ||
-      cleanedResponse.endsWith("`")
-    ) {
-      cleanedResponse = cleanedResponse.substring(0, cleanedResponse.length - 1);
+    
+    console.log("🔧 Cleaning response, original length:", response.length);
+    let cleaned = response.trim();
+    
+    // Remove markdown code fences
+    cleaned = cleaned.replace(/^```html\s*/i, "");
+    cleaned = cleaned.replace(/^```\s*/i, "");
+    cleaned = cleaned.replace(/\s*```$/i, "");
+    
+    // Remove ONE set of quotes if wrapped
+    if ((cleaned.startsWith('"') && cleaned.endsWith('"')) ||
+        (cleaned.startsWith("'") && cleaned.endsWith("'"))) {
+      cleaned = cleaned.slice(1, -1);
     }
-
-    // Trim whitespace
-    cleanedResponse = cleanedResponse.trim();
-
-    // If still starts with backticks, remove first line
-    if (cleanedResponse.indexOf("```") !== -1) {
-      const lines = cleanedResponse.split("\n");
-      lines.shift(); // Remove first line
-      cleanedResponse = lines.join("\n");
+    
+    cleaned = cleaned.trim();
+    
+    // CRITICAL: Remove AI explanations that appear after the HTML
+    // Find where actual HTML content ends (after closing </html>, </div>, or </body>)
+    const htmlEndPatterns = [
+      /<\/html>\s*/i,
+      /<\/body>\s*/i,
+      /<\/div>\s*$/i
+    ];
+    
+    for (const pattern of htmlEndPatterns) {
+      const match = cleaned.match(pattern);
+      if (match) {
+        const endIndex = match.index + match[0].length;
+        // Check if there's significant text after the HTML
+        const afterHtml = cleaned.substring(endIndex).trim();
+        if (afterHtml.length > 50) {
+          // Likely AI explanation - cut it off
+          console.log("✂️ Removing AI explanation text after HTML");
+          cleaned = cleaned.substring(0, endIndex);
+          break;
+        }
+      }
     }
-
-    return cleanedResponse;
+    
+    cleaned = cleaned.trim();
+    console.log("✨ Cleaned response length:", cleaned.length);
+    console.log("📝 First 200 chars:", cleaned.substring(0, 200));
+    
+    // Validation
+    if (cleaned.length < 20) {
+      console.error("⚠️ Cleaned content too short! Returning original.");
+      return response;
+    }
+    
+    return cleaned;
   };
 
-=======
-  // Remove HTML code block markers
-  cleanedResponse = cleanedResponse.replace(/```html/g, "");
-  cleanedResponse = cleanedResponse.replace(/```/g, "");
-
-  // Remove quotes at start and end
-  while (
-    cleanedResponse.startsWith('"') ||
-    cleanedResponse.startsWith("'") ||
-    cleanedResponse.startsWith("`")
-  ) {
-    cleanedResponse = cleanedResponse.substring(1);
-  }
-  while (
-    cleanedResponse.endsWith('"') ||
-    cleanedResponse.endsWith("'") ||
-    cleanedResponse.endsWith("`")
-  ) {
-    cleanedResponse = cleanedResponse.substring(0, cleanedResponse.length - 1);
-  }
-
-  // Trim whitespace
-  cleanedResponse = cleanedResponse.trim();
-
-  // If still starts with backticks, remove first line
-  if (cleanedResponse.indexOf("```") !== -1) {
-    const lines = cleanedResponse.split("\n");
-    lines.shift(); // Remove first line
-    cleanedResponse = lines.join("\n");
-  }
-
-  return cleanedResponse;
-};
-
-
-  // Extract text from HTML
->>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
   const extractTextFromHtml = (htmlString) => {
     const tempDiv = document.createElement("div");
     tempDiv.innerHTML = htmlString;
 
     const unwantedTags = [
-      "script",
-      "style",
-      "nav",
-      "header",
-      "footer",
-      "aside",
-      "noscript",
-      "iframe",
-      "object",
-      "embed"
+      "script", "style", "nav", "header", "footer", "aside", 
+      "noscript", "iframe", "object", "embed"
     ];
     unwantedTags.forEach((tag) => {
       const elements = tempDiv.getElementsByTagName(tag);
@@ -216,14 +158,8 @@ export default function App() {
 
     let content = "";
     const mainSelectors = [
-      "main",
-      "article",
-      "[role='main']",
-      ".content",
-      "#content",
-      ".post",
-      ".article",
-      ".entry-content"
+      "main", "article", "[role='main']", ".content",
+      "#content", ".post", ".article", ".entry-content"
     ];
 
     for (const selector of mainSelectors) {
@@ -257,10 +193,17 @@ export default function App() {
     } catch (error) {
       console.log("Direct fetch failed:", error);
     }
-    const proxies = ["https://api.allorigins.win/get?url=", "https://thingproxy.freeboard.io/fetch/"];
+    
+    const proxies = [
+      "https://api.allorigins.win/get?url=", 
+      "https://thingproxy.freeboard.io/fetch/"
+    ];
+    
     for (const proxy of proxies) {
       try {
-        const proxyUrl = proxy.includes("allorigins") ? proxy + encodeURIComponent(url) : proxy + url;
+        const proxyUrl = proxy.includes("allorigins") 
+          ? proxy + encodeURIComponent(url) 
+          : proxy + url;
         const response = await fetch(proxyUrl, {
           method: "GET",
           headers: {
@@ -269,6 +212,7 @@ export default function App() {
           },
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
         let responseData;
         if (proxy.includes("allorigins")) {
           const jsonResponse = await response.json();
@@ -276,6 +220,7 @@ export default function App() {
         } else {
           responseData = await response.text();
         }
+        
         if (responseData) {
           const extractedContent = extractTextFromHtml(responseData);
           if (extractedContent && extractedContent.length > 50) return extractedContent;
@@ -287,7 +232,6 @@ export default function App() {
     throw new Error("Failed to fetch content from URL");
   };
 
-<<<<<<< HEAD
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -301,27 +245,40 @@ export default function App() {
       showErrorDialog("Failed to read file");
     };
     reader.readAsText(file);
-=======
-  // YOUR GENERATE CONTENT FROM GEMINI FUNCTION
-  const generateContentFromGemini = async (prompt) => {
-  const payload = {
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0.7, topK: 40, topP: 0.95, maxOutputTokens: 8192 },
->>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
   };
 
   const callGeminiAPI = async (endpoint, prompt) => {
+    console.log("🔄 Calling Gemini API...");
     const response = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.25, maxOutputTokens: 8192 },
+        generationConfig: { 
+          temperature: 0.25, 
+          maxOutputTokens: 8192,
+          topP: 0.95,
+          topK: 40
+        },
       }),
     });
-    if (!response.ok) throw new Error(`API failed: ${response.status}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ API Error:", response.status, errorText);
+      throw new Error(`API failed: ${response.status}`);
+    }
+    
     const data = await response.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!text) {
+      console.error("❌ No text in API response:", data);
+      throw new Error("No content generated");
+    }
+    
+    console.log("✅ API response received, length:", text.length);
+    return text;
   };
 
   const handleGenerate = async () => {
@@ -329,106 +286,135 @@ export default function App() {
       showErrorDialog("Please provide text, a file, or a URL");
       return;
     }
+    
     setIsGenerating(true);
     setGenStatus("Processing input...");
     let sourceText = textInput;
+    
     try {
-<<<<<<< HEAD
       if (urlInput && !sourceText) {
         setGenStatus("Fetching content from URL...");
-        sourceText = await fetchUrlContent(urlInput);
-        if (!sourceText) {
-          showErrorDialog("Could not extract content from the URL");
+        try {
+          sourceText = await fetchUrlContent(urlInput);
+          if (!sourceText || sourceText.length < 100) {
+            showErrorDialog("Could not extract enough content from URL. Try pasting text directly.");
+            setIsGenerating(false);
+            setGenStatus("");
+            return;
+          }
+          setTextInput(sourceText);
+        } catch (urlError) {
+          showErrorDialog("Failed to fetch URL. Please paste the text directly instead.");
+          setIsGenerating(false);
+          setGenStatus("");
           return;
         }
-        setTextInput(sourceText);
-=======
-      const response = await fetch(API_ENDPOINTS[i], {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const jsonResponse = await response.json();
-
-      if (!response.ok) {
-        if (i < API_ENDPOINTS.length - 1) continue;
-        throw new Error(jsonResponse.error?.message || "Unknown API error");
->>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
       }
-      if (!sourceText) {
-        showErrorDialog("No valid content to process");
+      
+      if (!sourceText || sourceText.trim().length < 50) {
+        showErrorDialog("Please provide more content (at least 50 characters)");
+        setIsGenerating(false);
+        setGenStatus("");
         return;
       }
+      
       const truncatedText = sourceText.substring(0, 30000);
+      console.log("📄 Processing text, length:", truncatedText.length);
+      
       const prompts = {
-        notes: `Convert this content into comprehensive, well-structured study notes in HTML format. Use semantic HTML5 elements, headings (h2, h3, h4), lists (ul/ol), and paragraphs. Include <strong> for emphasis, <mark> for highlights, and <blockquote> for important concepts. Make it educational and easy to scan: ${truncatedText}`,
-        mindmap: `Create an interactive, colorful mind map HTML visualization of this content. Use nested divs with CSS for styling. Center the main topic, branch out key concepts, and include sub-branches for details. Use colors, borders, and padding to create visual hierarchy: ${truncatedText}`,
-        quiz: `Generate an interactive quiz in HTML format with 10 multiple-choice questions based on this content. Include radio buttons, a submit button, and JavaScript for scoring. Show correct answers on submission with explanations: ${truncatedText}`,
-        flashcard: `Create interactive flashcards in HTML format. Generate 10 cards with question on front and answer on back. Use CSS transforms for flip animation. Include navigation buttons and card counter: ${truncatedText}`
+        notes: `Create comprehensive study notes in HTML format. IMPORTANT: Return ONLY the HTML code, no explanations or markdown. Use proper HTML tags like <div>, <h2>, <h3>, <p>, <ul>, <li>, <strong>. Make it well-structured and easy to read. Add inline styles for colors if needed. Content:\n\n${truncatedText}`,
+        
+        mindmap: `Create an HTML mind map with nested <div> elements. IMPORTANT: Return ONLY the HTML code, no explanations. Use inline CSS for styling (colors, borders, padding, margins). Structure it as a visual hierarchy with a main topic and branches. Content:\n\n${truncatedText}`,
+        
+        quiz: `Generate 10 multiple-choice questions in HTML format. IMPORTANT: Return ONLY the HTML code, no explanations or instructions. Use <div> containers, proper structure, and include a way to check answers. Make questions clear and relevant. Content:\n\n${truncatedText}`,
+        
+        flashcard: `Create 10 flashcards in HTML format. IMPORTANT: Return ONLY the HTML code with no explanations, comments, or instructions after the HTML. Use <div> elements with classes 'flashcard', 'card-front', 'card-back'. Include inline CSS for styling. Make questions concise and answers clear. Content:\n\n${truncatedText}`
       };
 
-<<<<<<< HEAD
       for (const [type, prompt] of Object.entries(prompts)) {
-        setGenStatus(`Generating ${type}...`);
+        setGenStatus(`Generating ${type}... (may take 10-30 seconds)`);
         let success = false;
-        for (const endpoint of API_ENDPOINTS) {
+        let lastError = null;
+        
+        for (let i = 0; i < API_ENDPOINTS.length; i++) {
+          const endpoint = API_ENDPOINTS[i];
           try {
+            console.log(`\n🔄 Trying endpoint ${i + 1}/${API_ENDPOINTS.length} for ${type}`);
             const response = await callGeminiAPI(endpoint, prompt);
-            const cleanedResponse = cleanHtmlResponse(response);
-            switch (type) {
-              case "notes": setNotesContent(cleanedResponse); break;
-              case "mindmap": setMindmapContent(cleanedResponse); break;
-              case "quiz": setQuizContent(cleanedResponse); break;
-              case "flashcard": setFlashcardContent(cleanedResponse); break;
+            
+            if (!response || response.length < 100) {
+              console.warn(`⚠️ Response too short for ${type}:`, response?.length);
+              continue;
             }
+            
+            const cleanedResponse = cleanHtmlResponse(response);
+            
+            console.log(`\n========================================`);
+            console.log(`✅ GENERATED ${type.toUpperCase()}`);
+            console.log(`   Cleaned Length: ${cleanedResponse.length}`);
+            console.log(`   Preview: ${cleanedResponse.substring(0, 300)}...`);
+            console.log(`========================================\n`);
+            
+            if (!cleanedResponse || cleanedResponse.length < 50) {
+              console.error(`❌ Cleaned ${type} too short!`);
+              throw new Error(`Generated ${type} is too short or empty`);
+            }
+            
+            // Set content with explicit logging
+            switch (type) {
+              case "notes": 
+                console.log("💾 Setting NOTES content...");
+                setNotesContent(cleanedResponse);
+                console.log("✅ Notes content SET successfully");
+                break;
+              case "mindmap": 
+                console.log("💾 Setting MINDMAP content...");
+                setMindmapContent(cleanedResponse);
+                console.log("✅ Mindmap content SET successfully");
+                break;
+              case "quiz": 
+                console.log("💾 Setting QUIZ content...");
+                setQuizContent(cleanedResponse);
+                console.log("✅ Quiz content SET successfully");
+                break;
+              case "flashcard": 
+                console.log("💾 Setting FLASHCARD content...");
+                setFlashcardContent(cleanedResponse);
+                console.log("✅ Flashcard content SET successfully");
+                break;
+            }
+            
             success = true;
             break;
           } catch (error) {
-            console.log(`Endpoint failed: ${endpoint}`, error);
+            console.error(`❌ Endpoint ${i + 1} failed for ${type}:`, error);
+            lastError = error;
+            if (i < API_ENDPOINTS.length - 1) {
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
           }
         }
-        if (!success) throw new Error(`Failed to generate ${type} with all endpoints`);
+        
+        if (!success) {
+          throw new Error(`Failed to generate ${type}. Error: ${lastError?.message || 'Unknown error'}`);
+        }
+        
+        // Small delay between content types
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
-      setGenStatus("All materials generated successfully!");
+      
+      console.log("🎉 ALL CONTENT GENERATED SUCCESSFULLY!");
+      setGenStatus("✅ All materials generated successfully!");
       setActiveTab("notes");
       setTimeout(() => setGenStatus(""), 3000);
-=======
-      // ✅ Proper optional chaining
-      const generatedText =
-        jsonResponse?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (generatedText) return cleanHtmlResponse(generatedText);
-
-      if (i < API_ENDPOINTS.length - 1) continue;
-      throw new Error("Invalid API response.");
->>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
+      
     } catch (error) {
-      showErrorDialog("Failed to generate materials", error);
+      console.error("💥 Generation error:", error);
+      showErrorDialog(`Failed to generate materials: ${error.message}. Please try with shorter text or check your API quota.`, error);
+      setGenStatus("");
     } finally {
       setIsGenerating(false);
     }
-<<<<<<< HEAD
-=======
-  }
-  return "";
-};
-
-
-  // Content generators
-  const generateSmartNotes = async (inputText) => {
-    const prompt = `Create study notes from this content. Return ONLY clean HTML without markdown blocks, backticks, emojis, or code fences:
-${inputText}
-
-Structure:
-<h2>Title</h2>
-<h3>Section Heading</h3>
-<ul><li>Key point</li></ul>
-<strong>Important terms</strong>
-No emojis or special characters.
-Return clean HTML only.`;
-    const htmlContent = await generateContentFromGemini(prompt);
-    setNotesContent(htmlContent);
->>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
   };
 
   const resetSpeechControls = () => {
@@ -447,87 +433,11 @@ Return clean HTML only.`;
     return text.trim();
   };
 
-<<<<<<< HEAD
   const splitIntoSentences = (text) => {
     const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
     return sentences.map((s) => s.trim()).filter((s) => s.length > 0);
   };
 
-=======
-  // YOUR GENERATE FLASHCARDS FUNCTION
- const generateFlashcards = async (inputText) => {
-  const prompt = `Create 8 flashcards from this content. Return ONLY clean HTML, no markdown fences, no emojis.
-Use this exact structure per card:
-<div class="flashcard">
-  <div class="card-inner">
-    <div class="card-face card-front"><p>QUESTION</p></div>
-    <div class="card-face card-back"><p>ANSWER</p></div>
-  </div>
-</div>
-Wrap all cards inside:
-<div class="flashcard-deck"> ...cards... </div>
-
-Content: ${inputText}`;
-  
-  const htmlContent = await generateContentFromGemini(prompt);
-  setFlashcardContent(htmlContent);
-};
-
-// ✅ Event handlers
-const handleFileChange = (e) => {
-  const file = e.target.files?.[0] || null;
-  setFileInput(file);
-};
-
-const handleGenerate = async () => {
-  setIsGenerating(true);
-  setGenStatus("Preparing your content...");
-  let processedText = textInput.trim();
-
-  try {
-    if (!processedText && urlInput && !fileInput) {
-      setGenStatus("Fetching content from URL...");
-      processedText = await fetchUrlContent(urlInput);
-      setGenStatus("URL content loaded!");
-    }
-
-    if (!processedText && fileInput) {
-      setGenStatus("Reading file...");
-      processedText = await fileInput.text();
-    }
-
-    if (!processedText) {
-      throw new Error("Please provide text, a URL, or a file.");
-    }
-
-    setGenStatus("Creating Smart Notes...");
-    await generateSmartNotes(processedText);
-    await new Promise((resolve) => setTimeout(resolve, 400));
-
-    setGenStatus("Building Mind Map...");
-    await generateMindMap(processedText);
-    await new Promise((resolve) => setTimeout(resolve, 400));
-
-    setGenStatus("Crafting Quiz...");
-    await generateQuiz(processedText);
-    await new Promise((resolve) => setTimeout(resolve, 400));
-
-    setGenStatus("Designing Flashcards...");
-    await generateFlashcards(processedText);
-
-    setGenStatus("✅ All materials generated! Check the tabs above.");
-    setActiveTab("notes");
-  } catch (error) {
-    showErrorDialog("Generation failed", error);
-    setGenStatus("Error occurred.");
-  } finally {
-    setIsGenerating(false);
-  }
-};
-
-
-  // Speech synthesis functions
->>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
   const initializeSpeech = () => {
     if (!notesContent) {
       showErrorDialog("No notes to read. Please generate content first.");
@@ -558,19 +468,6 @@ const handleGenerate = async () => {
     utterance.rate = speechSpeed;
     utterance.pitch = 1;
     utterance.volume = 1;
-<<<<<<< HEAD
-=======
-    
-    const selectedVoices = pickVoice();
-    if (selectedVoices && selectedVoices.length > 0)
-      utterance.voice = selectedVoices;
-
-    utterance.onstart = () => {
-      setIsPlaying(true);
-      setIsPaused(false);
-    };
-    
->>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c
     utterance.onend = () => {
       setCurrentSentenceIndex((prevIndex) => {
         const newIndex = prevIndex + 1;
@@ -640,15 +537,17 @@ const handleGenerate = async () => {
   };
 
   const handleTabChange = (tab) => {
+    if (isGenerating) {
+      alert("⏳ Please wait! Content is still generating. Don't switch tabs yet!");
+      return;
+    }
     window.speechSynthesis.cancel();
     resetSpeechControls();
     setActiveTab(tab);
   };
 
   return (
-<<<<<<< HEAD
     <div className="App" data-theme={theme}>
-      {/* Main Image Header - Replaces the logos */}
       <div className="main-image-header">
         <img 
           src="/Main-Image.png" 
@@ -662,10 +561,7 @@ const handleGenerate = async () => {
           <img 
             src="/Header-logo.png" 
             alt="Logo" 
-            style={{
-              width: '64px', 
-              height: '64px',
-            }} 
+            style={{ width: '64px', height: '64px' }} 
           />
         </div>
         <div className="right">
@@ -699,60 +595,146 @@ const handleGenerate = async () => {
             />
             <div className="center-btn">
               <button onClick={handleGenerate} disabled={isGenerating}>
-                {isGenerating ? "Generating..." : "Generate Learning Materials"}
+                {isGenerating ? "⏳ Generating..." : "🚀 Generate Learning Materials"}
               </button>
             </div>
-            <div id="genStatus">{genStatus}</div>
+            {genStatus && <div id="genStatus">{genStatus}</div>}
           </section>
         )}
 
         {activeTab === "notes" && (
-          <section className="tab-panel">
-            <div className="speech-controls">
-              <button onClick={handlePlay} className="speech-btn primary">
-                {isPlaying && !isPaused ? "Stop" : isPaused ? "Resume" : "Read Aloud"}
-              </button>
-              <button onClick={handlePause} disabled={!isPlaying || isPaused} className="speech-btn">Pause</button>
-              <button onClick={handleRewind} disabled={!isPlaying && !isPaused} className="speech-btn">Rewind</button>
-              <button onClick={handleSkip} disabled={!isPlaying && !isPaused} className="speech-btn">Skip</button>
-              <label htmlFor="speedSlider" className="ml-2">Speed</label>
-              <input
-                id="speedSlider"
-                type="range"
-                min="0.5"
-                max="2"
-                step="0.1"
-                value={speechSpeed}
-                onChange={(e) => onChangeSpeed(e.target.value)}
-              />
-              <span>{speechSpeed.toFixed(1)}x</span>
-            </div>
-            <div style={{ textAlign: settings.textAlign }} dangerouslySetInnerHTML={{ __html: notesContent }} />
+          <section className="tab-panel active">
+            {isGenerating ? (
+              <div style={{ textAlign: 'center', padding: '60px' }}>
+                <div className="loading-spinner"></div>
+                <p style={{ marginTop: '24px', fontSize: '20px', fontWeight: 'bold' }}>
+                  {genStatus || '⏳ Generating your notes...'}
+                </p>
+                <p style={{ fontSize: '16px', opacity: 0.8, marginTop: '12px' }}>
+                  Please wait 30-90 seconds. Stay on this page!
+                </p>
+              </div>
+            ) : notesContent ? (
+              <>
+                <div className="speech-controls">
+                  <button onClick={handlePlay} className="speech-btn primary">
+                    {isPlaying && !isPaused ? "⏹ Stop" : isPaused ? "▶️ Resume" : "🔊 Read Aloud"}
+                  </button>
+                  <button onClick={handlePause} disabled={!isPlaying || isPaused} className="speech-btn">⏸ Pause</button>
+                  <button onClick={handleRewind} disabled={!isPlaying && !isPaused} className="speech-btn">⏪ Rewind</button>
+                  <button onClick={handleSkip} disabled={!isPlaying && !isPaused} className="speech-btn">⏩ Skip</button>
+                  <div className="speed-control">
+                    <label htmlFor="speedSlider">Speed:</label>
+                    <input
+                      id="speedSlider"
+                      type="range"
+                      min="0.5"
+                      max="2"
+                      step="0.1"
+                      value={speechSpeed}
+                      onChange={(e) => onChangeSpeed(e.target.value)}
+                    />
+                    <span>{speechSpeed.toFixed(1)}x</span>
+                  </div>
+                </div>
+                <div 
+                  className="content-display"
+                  style={{ 
+                    textAlign: settings.textAlign,
+                    padding: '20px',
+                    minHeight: '300px',
+                    color: '#000000'
+                  }} 
+                  dangerouslySetInnerHTML={{ __html: notesContent }} 
+                />
+              </>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '60px' }}>
+                <p style={{ fontSize: '20px', opacity: 0.7 }}>
+                  📝 No notes generated yet.<br/>
+                  Go to the <strong>Input</strong> tab and click "Generate Learning Materials"!
+                </p>
+              </div>
+            )}
           </section>
         )}
 
         {activeTab === "mindmap" && (
-          <section className="tab-panel">
-            <div dangerouslySetInnerHTML={{ __html: mindmapContent }} />
+          <section className="tab-panel active">
+            {isGenerating ? (
+              <div style={{ textAlign: 'center', padding: '60px' }}>
+                <div className="loading-spinner"></div>
+                <p style={{ marginTop: '24px', fontSize: '20px', fontWeight: 'bold' }}>
+                  {genStatus || '⏳ Generating your mind map...'}
+                </p>
+              </div>
+            ) : mindmapContent ? (
+              <div 
+                className="content-display"
+                style={{ padding: '20px', minHeight: '300px', color: '#000000' }}
+                dangerouslySetInnerHTML={{ __html: mindmapContent }} 
+              />
+            ) : (
+              <div style={{ textAlign: 'center', padding: '60px' }}>
+                <p style={{ fontSize: '20px', opacity: 0.7 }}>
+                  🧠 No mind map yet. Generate materials first!
+                </p>
+              </div>
+            )}
           </section>
         )}
 
         {activeTab === "quiz" && (
-          <section className="tab-panel">
-            <div dangerouslySetInnerHTML={{ __html: quizContent }} />
+          <section className="tab-panel active">
+            {isGenerating ? (
+              <div style={{ textAlign: 'center', padding: '60px' }}>
+                <div className="loading-spinner"></div>
+                <p style={{ marginTop: '24px', fontSize: '20px', fontWeight: 'bold' }}>
+                  {genStatus || '⏳ Generating your quiz...'}
+                </p>
+              </div>
+            ) : quizContent ? (
+              <div 
+                className="content-display"
+                style={{ padding: '20px', minHeight: '300px', color: '#000000' }}
+                dangerouslySetInnerHTML={{ __html: quizContent }} 
+              />
+            ) : (
+              <div style={{ textAlign: 'center', padding: '60px' }}>
+                <p style={{ fontSize: '20px', opacity: 0.7 }}>
+                  ❓ No quiz yet. Generate materials first!
+                </p>
+              </div>
+            )}
           </section>
         )}
 
         {activeTab === "flashcard" && (
-          <section className="tab-panel">
-            <div
-              className="flashcard-host"
-              onClick={(e) => {
-                const card = e.target.closest(".flashcard");
-                if (card) card.classList.toggle("flipped");
-              }}
-              dangerouslySetInnerHTML={{ __html: flashcardContent }}
-            />
+          <section className="tab-panel active">
+            {isGenerating ? (
+              <div style={{ textAlign: 'center', padding: '60px' }}>
+                <div className="loading-spinner"></div>
+                <p style={{ marginTop: '24px', fontSize: '20px', fontWeight: 'bold' }}>
+                  {genStatus || '⏳ Generating your flashcards...'}
+                </p>
+              </div>
+            ) : flashcardContent ? (
+              <div
+                className="flashcard-host content-display"
+                style={{ padding: '20px', minHeight: '300px' }}
+                onClick={(e) => {
+                  const card = e.target.closest(".flashcard");
+                  if (card) card.classList.toggle("flipped");
+                }}
+                dangerouslySetInnerHTML={{ __html: flashcardContent }}
+              />
+            ) : (
+              <div style={{ textAlign: 'center', padding: '60px' }}>
+                <p style={{ fontSize: '20px', opacity: 0.7 }}>
+                  🎴 No flashcards yet. Generate materials first!
+                </p>
+              </div>
+            )}
           </section>
         )}
       </main>
@@ -760,38 +742,68 @@ const handleGenerate = async () => {
       {showSettings && (
         <div className="modal-bg" onClick={() => setShowSettings(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2>Settings</h2>
+            <h2>⚙️ Settings</h2>
             <div className="form-row">
-              <label>Font Size</label>
-              <input type="range" min="12" max="24" value={settings.fontSize} onChange={(e) => setSettings({ ...settings, fontSize: parseInt(e.target.value) })} />
+              <label>Font Size: {settings.fontSize}px</label>
+              <input 
+                type="range" 
+                min="12" 
+                max="24" 
+                value={settings.fontSize} 
+                onChange={(e) => setSettings({ ...settings, fontSize: parseInt(e.target.value) })} 
+              />
             </div>
             <div className="form-row">
               <label>Font Family</label>
-              <select value={settings.fontFamily} onChange={(e) => setSettings({ ...settings, fontFamily: e.target.value })}>
-                <option>Libre Franklin, sans-serif</option>
+              <select 
+                value={settings.fontFamily} 
+                onChange={(e) => setSettings({ ...settings, fontFamily: e.target.value })}
+              >
+                <option>Lexend, Arial, sans-serif</option>
                 <option>Inter, Arial, sans-serif</option>
                 <option>OpenDyslexic, Arial, sans-serif</option>
               </select>
             </div>
             <div className="form-row">
               <label>Text Align</label>
-              <select value={settings.textAlign} onChange={(e) => setSettings({ ...settings, textAlign: e.target.value })}>
+              <select 
+                value={settings.textAlign} 
+                onChange={(e) => setSettings({ ...settings, textAlign: e.target.value })}
+              >
                 <option value="left">Left</option>
                 <option value="justify">Justify</option>
                 <option value="center">Center</option>
               </select>
             </div>
             <div className="form-row">
-              <label>Line Height</label>
-              <input type="range" min="1.2" max="2.5" step="0.1" value={settings.lineHeight} onChange={(e) => setSettings({ ...settings, lineHeight: parseFloat(e.target.value) })} />
+              <label>Line Height: {settings.lineHeight}</label>
+              <input 
+                type="range" 
+                min="1.2" 
+                max="2.5" 
+                step="0.1" 
+                value={settings.lineHeight} 
+                onChange={(e) => setSettings({ ...settings, lineHeight: parseFloat(e.target.value) })} 
+              />
             </div>
             <div className="form-row">
-              <label>Letter Spacing</label>
-              <input type="range" min="0" max="3" step="0.1" value={settings.letterSpacing} onChange={(e) => setSettings({ ...settings, letterSpacing: parseFloat(e.target.value) })} />
+              <label>Letter Spacing: {settings.letterSpacing}px</label>
+              <input 
+                type="range" 
+                min="0" 
+                max="3" 
+                step="0.1" 
+                value={settings.letterSpacing} 
+                onChange={(e) => setSettings({ ...settings, letterSpacing: parseFloat(e.target.value) })} 
+              />
             </div>
             <div className="form-row">
               <label>
-                <input type="checkbox" checked={settings.bionic} onChange={(e) => setSettings({ ...settings, bionic: e.target.checked})} />
+                <input 
+                  type="checkbox" 
+                  checked={settings.bionic} 
+                  onChange={(e) => setSettings({ ...settings, bionic: e.target.checked})} 
+                />
                 Bionic Reading
               </label>
             </div>
@@ -805,8 +817,8 @@ const handleGenerate = async () => {
       {showError && (
         <div className="modal-bg" onClick={() => setShowError(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ color: "var(--color-red-500)" }}>Error</h2>
-            <p className="mb-4">{errorMessage}</p>
+            <h2 style={{ color: "#ff000d" }}>❌ Error</h2>
+            <p className="mb-4" style={{ color: '#000000' }}>{errorMessage}</p>
             <button onClick={() => setShowError(false)}>Got It!</button>
           </div>
         </div>
@@ -814,260 +826,3 @@ const handleGenerate = async () => {
     </div>
   );
 }
-=======
-    <div className="home-page">
-      <section className="front-section">
-  <div className="front-bg"></div>
-
-  <img
-    src="/Cogni-Flow-1.png"
-    alt="Cogni-Flow Logo 1"
-    className="logo-animated logo-top"
-    style={{
-      transform: `translate(-50%, ${-scrollProgress * 180}px)`,
-      opacity: Math.max(0, 1 - scrollProgress * 1.5),
-    }}
-  />
-
-  <img
-    src="/Cogni-Flow-2.png"
-    alt="Cogni-Flow Logo 2"
-    className="logo-animated logo-bottom-left"
-    style={{
-      transform: `translate(${-scrollProgress * 120}px, ${scrollProgress * 120}px)`,
-      opacity: Math.max(0, 1 - scrollProgress * 1.5),
-    }}
-  />
-
-  <img
-    src="/Cogni-Flow-3.png"
-    alt="Cogni-Flow Logo 3"
-    className="logo-animated logo-bottom-right"
-    style={{
-      transform: `translate(${scrollProgress * 120}px, ${scrollProgress * 120}px)`,
-      opacity: Math.max(0, 1 - scrollProgress * 1.5),
-    }}
-  />
-
-  <img
-    src="/Cogni-Flow-4.png"
-    alt="Cogni-Flow Logo 4"
-    className={`logo-animated logo-center ${animationComplete ? 'to-header' : ''}`}
-    style={
-      animationComplete || scrollProgress > 0.8
-        ? {
-            position: 'fixed',
-            top: '20px',
-            left: '40px',
-            transform: 'scale(0.60)',
-            zIndex: 10000,
-          }
-        : {
-            transform: `translate(-50%, -50%) scale(${1 - scrollProgress * 0.36})`,
-            opacity: Math.max(0, 1 - scrollProgress * 0.8),
-          }   
-          }
-          />
-          </section>
-
-      {/* Main App Content - APPEARS ON SCROLL */}
-      <div className="main-app-content" style={{ 
-        marginTop: '100vh',
-        background: 'white',
-        borderRadius: '40px 40px 0 0',
-        paddingTop: '60px',
-        boxShadow: '0 -20px 50px rgba(0,0,0,0.1)',
-        position: 'relative',
-        zIndex: 1000,
-        minHeight: '100vh'
-      }}>
-        <div className="App" data-theme={theme}>
-          <header className="header">
-            <div className="logo-section">
-              <div className="logo">
-                <img src="/Cogni-Flow-4.png" alt="Cogni-Flow Logo" />
-              </div>
-              <div className="title-area">
-                <h1>Cogni-Flow</h1>
-                <p className="subtitle">Your Digital Learning Companion</p>
-              </div>
-            </div>
-            <div className="right">
-              <button onClick={() => setShowSettings(true)} title="Settings">⚙️</button>
-              <button onClick={() => setTheme(theme === "scheme1" ? "scheme2" : "scheme1")} title="Switch Color Scheme">🎨</button>
-            </div>
-          </header>
-
-          <main>
-            <nav>
-              <button className={activeTab === "input" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("input")}>Input</button>
-              <button className={activeTab === "notes" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("notes")}>Smart Notes</button>
-              <button className={activeTab === "mindmap" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("mindmap")}>Mind Map</button>
-              <button className={activeTab === "quiz" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("quiz")}>Quiz</button>
-              <button className={activeTab === "flashcard" ? "tab-btn active" : "tab-btn"} onClick={() => handleTabChange("flashcard")}>Flashcards</button>
-            </nav>
-
-            {activeTab === "input" && (
-              <section className="tab-panel active">
-                <textarea
-                  value={textInput}
-                  onChange={(e) => setTextInput(e.target.value)}
-                  placeholder="Paste your text here and watch the magic happen! Upload a file or enter a link to get started..."
-                />
-                <input type="file" onChange={handleFileChange} accept=".txt,.md" />
-                <input
-                  type="url"
-                  value={urlInput}
-                  onChange={(e) => setUrlInput(e.target.value)}
-                  placeholder="Paste a public article link here"
-                />
-                <div className="center-btn">
-                  <button onClick={handleGenerate} disabled={isGenerating}>
-                    {isGenerating ? "Generating..." : "Generate Learning Materials"}
-                  </button>
-                </div>
-                <div id="genStatus">{genStatus}</div>
-              </section>
-            )}
-
-            {activeTab === "notes" && (
-              <section className="tab-panel">
-                <div className="speech-controls">
-                  <button onClick={handlePlay} className="speech-btn primary">
-                    {isPlaying && !isPaused ? "Stop" : isPaused ? "Resume" : "Read Aloud"}
-                  </button>
-                  <button onClick={handlePause} disabled={!isPlaying || isPaused} className="speech-btn">Pause</button>
-                  <button onClick={handleRewind} disabled={!isPlaying && !isPaused} className="speech-btn">Rewind</button>
-                  <button onClick={handleSkip} disabled={!isPlaying && !isPaused} className="speech-btn">Skip</button>
-                  <label htmlFor="speedSlider" className="ml-2">Speed</label>
-                  <input
-                    id="speedSlider"
-                    type="range"
-                    min="0.5"
-                    max="2"
-                    step="0.1"
-                    value={speechSpeed}
-                    onChange={(e) => onChangeSpeed(e.target.value)}
-                  />
-                  <span>{speechSpeed.toFixed(1)}x</span>
-                </div>
-                <div style={{ textAlign: settings.textAlign }} dangerouslySetInnerHTML={{ __html: notesContent }} />
-              </section>
-            )}
-
-            {activeTab === "mindmap" && (
-              <section className="tab-panel">
-                <div dangerouslySetInnerHTML={{ __html: mindmapContent }} />
-              </section>
-            )}
-
-            {activeTab === "quiz" && (
-              <section className="tab-panel">
-                <div dangerouslySetInnerHTML={{ __html: quizContent }} />
-              </section>
-            )}
-
-            {activeTab === "flashcard" && (
-              <section className="tab-panel">
-                <div
-                  className="flashcard-host"
-                  onClick={(e) => {
-                    const card = e.target.closest(".flashcard");
-                    if (card) card.classList.toggle("flipped");
-                  }}
-                  dangerouslySetInnerHTML={{ __html: flashcardContent }}
-                />
-              </section>
-            )}
-          </main>
-
-          {showSettings && (
-            <div className="modal-bg" onClick={() => setShowSettings(false)}>
-              <div className="modal" onClick={(e) => e.stopPropagation()}>
-                <h2>Settings</h2>
-                <div className="form-row">
-                  <label>Font Size</label>
-                  <input
-                    type="range"
-                    min="12"
-                    max="24"
-                    value={settings.fontSize}
-                    onChange={(e) => setSettings({ ...settings, fontSize: parseInt(e.target.value) })}
-                  />
-                </div>
-                <div className="form-row">
-                  <label>Font Family</label>
-                  <select
-                    value={settings.fontFamily}
-                    onChange={(e) => setSettings({ ...settings, fontFamily: e.target.value })}
-                  >
-                    <option>Lexend, Arial, sans-serif</option>
-                    <option>Inter, Arial, sans-serif</option>
-                    <option>OpenDyslexic, Arial, sans-serif</option>
-                  </select>
-                </div>
-                <div className="form-row">
-                  <label>Text Align</label>
-                  <select
-                    value={settings.textAlign}
-                    onChange={(e) => setSettings({ ...settings, textAlign: e.target.value })}
-                  >
-                    <option value="left">Left</option>
-                    <option value="justify">Justify</option>
-                    <option value="center">Center</option>
-                  </select>
-                </div>
-                <div className="form-row">
-                  <label>Line Height</label>
-                  <input
-                    type="range"
-                    min="1.2"
-                    max="2.5"
-                    step="0.1"
-                    value={settings.lineHeight}
-                    onChange={(e) => setSettings({ ...settings, lineHeight: parseFloat(e.target.value) })}
-                  />
-                </div>
-                <div className="form-row">
-                  <label>Letter Spacing</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="3"
-                    step="0.1"
-                    value={settings.letterSpacing}
-                    onChange={(e) => setSettings({ ...settings, letterSpacing: parseFloat(e.target.value) })}
-                  />
-                </div>
-                <div className="form-row">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={settings.bionic}
-                      onChange={(e) => setSettings({ ...settings, bionic: e.target.checked })}
-                    />
-                    Bionic Reading
-                  </label>
-                </div>
-                <div className="actions">
-                  <button onClick={() => setShowSettings(false)}>Close</button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {showError && (
-            <div className="modal-bg" onClick={() => setShowError(false)}>
-              <div className="modal" onClick={(e) => e.stopPropagation()}>
-                <h2 style={{ color: "var(--color-red-500)" }}>Error</h2>
-                <p className="mb-4">{errorMessage}</p>
-                <button onClick={() => setShowError(false)}>Got It!</button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
->>>>>>> cbc13805d99cad7bf8a6aa44a04fadae040f765c

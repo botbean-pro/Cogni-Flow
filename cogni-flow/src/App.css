@@ -3132,3 +3132,54 @@ button *,
   background: #ff7c83 !important;  /* Lighter red hover */
   color: #ffffff !important;
 }
+
+/* ADD THIS TO THE END OF YOUR App.css FILE */
+
+/* EMERGENCY VISIBILITY FIXES */
+.content-display {
+  background: #ffffff !important;
+  color: #000000 !important;
+  padding: 20px !important;
+  min-height: 200px !important;
+}
+
+.content-display * {
+  color: #000000 !important;
+}
+
+.content-display h1, 
+.content-display h2, 
+.content-display h3 {
+  color: #000000 !important;
+  margin: 20px 0 10px 0 !important;
+}
+
+.content-display p {
+  color: #000000 !important;
+  margin: 10px 0 !important;
+}
+
+.content-display ul,
+.content-display ol {
+  color: #000000 !important;
+  margin: 10px 0 !important;
+  padding-left: 30px !important;
+}
+
+.content-display li {
+  color: #000000 !important;
+  margin: 5px 0 !important;
+}
+
+/* Force all tab panels to show content clearly */
+.tab-panel.active {
+  display: block !important;
+  background: #ffba00 !important;
+  color: #000000 !important;
+}
+
+/* Loading spinner visibility */
+.loading-spinner {
+  display: block !important;
+  margin: 0 auto !important;
+}
