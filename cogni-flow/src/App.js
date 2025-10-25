@@ -42,6 +42,7 @@ export default function App() {
   const [mindmapContent, setMindmapContent] = useState("");
   const [quizContent, setQuizContent] = useState("");
   const [flashcardContent, setFlashcardContent] = useState("");
+  const [showQuizAnswers, setShowQuizAnswers] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [settings, setSettings] = useState({
@@ -124,41 +125,71 @@ export default function App() {
   };
 
   const cleanHtmlResponse = (response) => {
-  if (!response) return "";
-  let cleanedResponse = response;
+    if (!response) return "";
+    let cleanedResponse = response;
 
-  // Remove HTML code block markers
-  cleanedResponse = cleanedResponse.replace(/```html/g, "");
-  cleanedResponse = cleanedResponse.replace(/```/g, "");
+    // Remove all code block markers variations
+    cleanedResponse = cleanedResponse.replace(/```html\n?/gi, "");
+    cleanedResponse = cleanedResponse.replace(/```\n?/g, "");
+    cleanedResponse = cleanedResponse.replace(/^```.*$/gm, "");
+    
+    // Remove any JSON wrapping
+    if (cleanedResponse.includes('"text":')) {
+      try {
+        const parsed = JSON.parse(cleanedResponse);
+        if (parsed.text) cleanedResponse = parsed.text;
+      } catch (e) {
+        // Not JSON, continue with string processing
+      }
+    }
 
-  // Remove quotes at start and end
-  while (
-    cleanedResponse.startsWith('"') ||
-    cleanedResponse.startsWith("'") ||
-    cleanedResponse.startsWith("`")
-  ) {
-    cleanedResponse = cleanedResponse.substring(1);
-  }
-  while (
-    cleanedResponse.endsWith('"') ||
-    cleanedResponse.endsWith("'") ||
-    cleanedResponse.endsWith("`")
-  ) {
-    cleanedResponse = cleanedResponse.substring(0, cleanedResponse.length - 1);
-  }
+    // Remove quotes at start and end (all types)
+    cleanedResponse = cleanedResponse.replace(/^['"`]+|['"`]+$/g, '');
+    
+    // Remove escaped characters
+    cleanedResponse = cleanedResponse.replace(/\\"/g, '"');
+    cleanedResponse = cleanedResponse.replace(/\\'/g, "'");
+    cleanedResponse = cleanedResponse.replace(/\\n/g, '\n');
+    cleanedResponse = cleanedResponse.replace(/\\t/g, '\t');
+    
+    // Trim whitespace
+    cleanedResponse = cleanedResponse.trim();
 
-  // Trim whitespace
-  cleanedResponse = cleanedResponse.trim();
+    // If still starts with backticks, remove first line
+    if (cleanedResponse.startsWith('```')) {
+      cleanedResponse = cleanedResponse.split('\n').slice(1).join('\n');
+    }
+    
+    // Remove any remaining backticks
+    if (cleanedResponse.indexOf("```") !== -1) {
+      cleanedResponse = cleanedResponse.replace(/```[a-z]*\n?/gi, '');
+    }
+    
+    // Ensure it starts with valid HTML
+    if (!cleanedResponse.match(/^<[a-z]/i) && !cleanedResponse.includes('<')) {
+      // If no HTML tags, wrap in div
+      cleanedResponse = `<div>${cleanedResponse}</div>`;
+    }
 
-  // If still starts with backticks, remove first line
-  if (cleanedResponse.indexOf("```") !== -1) {
-    const lines = cleanedResponse.split("\n");
-    lines.shift(); // Remove first line
-    cleanedResponse = lines.join("\n");
-  }
+    // Add styling to ensure content is visible
+    if (cleanedResponse && !cleanedResponse.includes('<style>')) {
+      cleanedResponse = `<style>
+        h1, h2, h3, h4, h5, h6 { color: #000000 !important; margin: 16px 0; font-weight: bold; }
+        p { color: #000000 !important; margin: 12px 0; line-height: 1.6; }
+        ul, ol { color: #000000 !important; margin: 12px 0; padding-left: 24px; }
+        li { color: #000000 !important; margin: 6px 0; line-height: 1.5; }
+        strong { font-weight: bold; color: #000000 !important; }
+        mark { background: #ffd34d; color: #000000; padding: 2px 4px; }
+        blockquote { border-left: 4px solid #ff000d; padding-left: 16px; margin: 16px 0; color: #000000 !important; }
+        .q { font-weight: bold; margin-top: 20px; padding: 12px; background: rgba(255, 186, 0, 0.2); border-left: 4px solid #ff000d; color: #000000 !important; }
+        .answer { margin-top: 10px; padding: 10px; background: rgba(124, 204, 174, 0.2); border-left: 4px solid #7cccae; color: #000000 !important; display: none; }
+        .flashcard { cursor: pointer; }
+        .flashcard-deck { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+      </style>` + cleanedResponse;
+    }
 
-  return cleanedResponse;
-};
+    return cleanedResponse;
+  };
 
 const extractTextFromHtml = (htmlString) => {
   const tempDiv = document.createElement("div");
@@ -310,10 +341,78 @@ const extractTextFromHtml = (htmlString) => {
       }
       const truncatedText = sourceText.substring(0, 30000);
       const prompts = {
-        notes: `Convert this content into comprehensive, well-structured study notes in HTML format. Use semantic HTML5 elements, headings (h2, h3, h4), lists (ul/ol), and paragraphs. Include <strong> for emphasis, <mark> for highlights, and <blockquote> for important concepts. Make it educational and easy to scan: ${truncatedText}`,
-        mindmap: `Create an interactive, colorful mind map HTML visualization of this content. Use nested divs with CSS for styling. Center the main topic, branch out key concepts, and include sub-branches for details. Use colors, borders, and padding to create visual hierarchy: ${truncatedText}`,
-        quiz: `Generate an interactive quiz in HTML format with 10 multiple-choice questions based on this content. Include radio buttons, a submit button, and JavaScript for scoring. Show correct answers on submission with explanations: ${truncatedText}`,
-        flashcard: `Create interactive flashcards in HTML format. Generate 10 cards with question on front and answer on back. Use CSS transforms for flip animation. Include navigation buttons and card counter: ${truncatedText}`
+        notes: `Create study notes from this content. Return ONLY clean HTML without any markdown code blocks, backticks, emojis, or formatting symbols:
+
+${truncatedText}
+
+Structure:
+- <h2>[Main Title]</h2>
+- <h3>Section headings</h3>
+- <ul><li>Key points</li></ul>
+- <p>Paragraphs for detailed explanations</p>
+- <strong>Important terms</strong>
+- <blockquote>Important concepts or quotes</blockquote>
+- No emojis or special characters
+
+Return clean HTML only.`,
+        mindmap: `Create a mind map from this content. Return ONLY clean HTML without markdown blocks, emojis, or special symbols. Keep sub-points SHORT (max 8 words each):
+
+${truncatedText}
+
+Use this EXACT structure:
+<h2>[MAIN TOPIC]</h2>
+<ul>
+  <li>[BRANCH 1 - Short Title]
+    <ul>
+      <li>[Short sub-point 1]</li>
+      <li>[Short sub-point 2]</li>
+      <li>[Short sub-point 3]</li>
+    </ul>
+  </li>
+  <li>[BRANCH 2 - Short Title]
+    <ul>
+      <li>[Short sub-point 1]</li>
+      <li>[Short sub-point 2]</li>
+    </ul>
+  </li>
+</ul>
+
+Keep ALL text short and concise. Return clean HTML only. No emojis or special characters.`,
+        quiz: `Create a quiz from this content. Return ONLY clean HTML without markdown blocks, emojis, or special symbols:
+
+${truncatedText}
+
+Structure for each question:
+<h2>Quiz</h2>
+<div class="q">Question 1: [Question text]</div>
+<ul>
+  <li>A) Option A</li>
+  <li>B) Option B</li>
+  <li>C) Option C</li>
+  <li>D) Option D</li>
+</ul>
+<div class="answer">Correct: A) Option A - [Brief explanation]</div>
+
+Create 10 questions. Return clean HTML only. No emojis or special characters.`,
+        flashcard: `Create 10 flashcards from this content. Return ONLY clean HTML without markdown blocks, emojis, or special symbols:
+
+${truncatedText}
+
+Use this exact structure for ALL cards:
+<div class="flashcard-deck">
+  <div class="flashcard" onclick="this.classList.toggle('flipped')">
+    <div class="card-inner">
+      <div class="card-face card-front">
+        <p>[QUESTION OR CONCEPT]</p>
+      </div>
+      <div class="card-face card-back">
+        <p>[ANSWER OR EXPLANATION]</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+Create 10 cards total. Return clean HTML only. No emojis or special characters.`
       };
 
       for (const [type, prompt] of Object.entries(prompts)) {
@@ -477,8 +576,8 @@ const extractTextFromHtml = (htmlString) => {
       {/* Main Image Header */}
       <div className="main-image-header">
         <img 
-          src="/Main-Image.png" 
-          alt="Cogni-Flow Main Visual" 
+          src="/Main-Image.gif" 
+          alt="Cogni-Flow Animation" 
           className="main-header-image" 
         />
       </div>
@@ -566,6 +665,34 @@ const extractTextFromHtml = (htmlString) => {
         {activeTab === "quiz" && (
           <section className="tab-panel active">
             <div className="quizContent" dangerouslySetInnerHTML={{ __html: quizContent }} />
+            {quizContent && quizContent.includes('class="answer"') && (
+              <button
+                onClick={() => setShowQuizAnswers(!showQuizAnswers)}
+                style={{
+                  marginTop: '25px',
+                  padding: '12px 25px',
+                  background: '#ff000d',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '25px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  display: 'block',
+                  margin: '25px auto',
+                  fontSize: '16px',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseOver={(e) => e.target.style.transform = 'translateY(-2px)'}
+                onMouseOut={(e) => e.target.style.transform = 'translateY(0)'}
+              >
+                {showQuizAnswers ? 'Hide Answers' : 'Show Answers'}
+              </button>
+            )}
+            <style>{`
+              .quizContent .answer {
+                display: ${showQuizAnswers ? 'block' : 'none'} !important;
+              }
+            `}</style>
           </section>
         )}
 

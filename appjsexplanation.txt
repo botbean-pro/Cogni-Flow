@@ -1,0 +1,869 @@
+APP.JS EXPLAINED (The Brain)
+Part 1: Setup
+javascript// Firebase - tracks who uses the app and what they do
+const firebaseConfig = { apiKey, authDomain, ... };
+initializeApp(firebaseConfig);
+
+// Google's AI (Gemini) - the magic that creates content
+const API_ENDPOINTS = [
+  "...gemini-2.5-flash...",  // Try this first (fastest)
+  "...gemini-2.0-flash...",  // Try this if first fails
+  "...gemini-2.5-pro..."     // Try this if both fail
+];
+What it means: We're connecting to Google's AI in 3 different ways. If one doesn't work, we have backups.
+
+Part 2: Memory (useState)
+These store information while the app is open:
+javascriptconst [activeTab, setActiveTab] = useState("input");
+// Which tab are we looking at? (Input, Notes, Quiz, etc)
+
+const [textInput, setTextInput] = useState("");
+// What text did the user type?
+
+const [notesContent, setNotesContent] = useState("");
+// The AI-generated study notes
+
+const [settings, setSettings] = useState({
+  fontSize: 16,
+  fontFamily: "...",
+  textAlign: "left",
+  lineHeight: 1.5,
+  letterSpacing: 0,
+  bionic: false
+});
+// User's display preferences
+
+const [isGenerating, setIsGenerating] = useState(false);
+// Is the AI currently making content?
+
+const [speechSpeed, setSpeechSpeed] = useState(1);
+// How fast should it read aloud? (1x = normal speed)
+
+const [isPlaying, setIsPlaying] = useState(false);
+// Is audio playing right now?
+
+Part 3: Save & Load Settings
+javascriptuseEffect(() => {
+  const saved = localStorage.getItem("cogniSet");
+  if (saved) setSettings(JSON.parse(saved));
+}, []);
+// When app opens: check if user saved settings before, if yes load them
+
+useEffect(() => {
+  localStorage.setItem("cogniSet", JSON.stringify(settings));
+}, [settings]);
+// Every time settings change: save them to browser memory
+
+Part 4: Clean Up AI Responses
+javascriptconst cleanHtmlResponse = (response) => {
+  // The AI sends back messy text like: ```html <content> ```
+  // This function removes all that garbage
+  cleanedResponse = cleanedResponse.replace(/```html/g, "");  // Remove ```html
+  cleanedResponse = cleanedResponse.replace(/```/g, "");      // Remove ```
+  // Remove quotes at the start and end
+  // Trim extra spaces
+  return cleanedResponse;
+}
+Why? The AI includes markdown code blocks that we don't need.
+
+Part 5: Extract Text from Websites
+javascriptconst extractTextFromHtml = (htmlString) => {
+  // When you paste a website link, we get all the HTML (messy code)
+  // This function finds just the main text content
+  
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = htmlString;
+  
+  // Remove junk: scripts, styles, ads, navbars, etc
+  unwantedTags.forEach((tag) => {
+    const elements = tempDiv.getElementsByTagName(tag);
+    for (let i = elements.length - 1; i >= 0; i--) {
+      elements[i].remove();  // Delete the junk
+    }
+  });
+  
+  // Look for main content in: <main>, <article>, .content, #content
+  // Use whichever has the most text
+  
+  return content.trim();  // Return clean text
+}
+Why? Websites have navigation, ads, sidebars. We only want the article.
+
+Part 6: Get Content from URLs
+javascriptconst fetchUrlContent = async (url) => {
+  // Try 1: Fetch the website directly
+  try {
+    const directResponse = await fetch(url);
+    const textContent = await directResponse.text();
+    const extractedContent = extractTextFromHtml(textContent);
+    if (extractedContent.length > 100) return extractedContent;
+  } catch (error) {
+    console.log("Direct fetch failed");
+  }
+  
+  // Try 2 & 3: Use proxy services if direct fetch doesn't work
+  const proxies = [
+    "https://api.allorigins.win/get?url=",
+    "https://thingproxy.freeboard.io/fetch/"
+  ];
+  
+  for (const proxy of proxies) {
+    try {
+      const response = await fetch(proxyUrl);
+      const responseData = await response.text();
+      const extractedContent = extractTextFromHtml(responseData);
+      if (extractedContent.length > 50) return extractedContent;
+    } catch (error) {
+      console.log("This proxy failed, try next one");
+    }
+  }
+  
+  // If all fail, show error
+  throw new Error("Failed to fetch content from URL");
+}
+In simple terms:
+
+Try to grab the website normally
+If that doesn't work, use a middleman service
+If that doesn't work, try another middleman
+If everything fails, tell the user it didn't work
+
+
+Part 7: Upload a File
+javascriptconst handleFileChange = async (e) => {
+  const file = e.target.files[0];  // Get the file user picked
+  
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const content = e.target.result;  // Get the text inside
+    setTextInput(content);  // Put it in the text box
+  };
+  
+  reader.readAsText(file);  // Read the file as text
+}
+What it does: When user uploads a .txt or .md file, read it and put it in the text area.
+
+Part 8: Talk to the AI
+javascriptconst callGeminiAPI = async (endpoint, prompt) => {
+  // Send a request to Google's AI
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { 
+        temperature: 0.25,      // Low = more organized answers
+        maxOutputTokens: 8192   // Max length of response
+      },
+    }),
+  });
+  
+  const data = await response.json();
+  return data.candidates[0].content.parts[0].text;  // Extract the answer
+}
+What it does: Send a question to Google's AI and get the answer back.
+
+Part 9: THE BIG ONE - Generate Everything
+javascriptconst handleGenerate = async () => {
+  // Step 1: Check if user provided something
+  if (!textInput && !urlInput) {
+    showErrorDialog("Please provide text, file, or URL");
+    return;
+  }
+  
+  setIsGenerating(true);
+  setGenStatus("Processing input...");
+  let sourceText = textInput;
+  
+  // Step 2: If user provided a URL, fetch it
+  if (urlInput && !sourceText) {
+    setGenStatus("Fetching content from URL...");
+    sourceText = await fetchUrlContent(urlInput);
+    setTextInput(sourceText);
+  }
+  
+  // Step 3: Trim to 30,000 characters (AI limit)
+  const truncatedText = sourceText.substring(0, 30000);
+  
+  // Step 4: Create 4 different requests to AI
+  const prompts = {
+    notes: `Convert this to study notes: ${truncatedText}`,
+    mindmap: `Create a mind map: ${truncatedText}`,
+    quiz: `Make a 10-question quiz: ${truncatedText}`,
+    flashcard: `Make flashcards: ${truncatedText}`
+  };
+  
+  // Step 5: Ask AI to create each one
+  for (const [type, prompt] of Object.entries(prompts)) {
+    setGenStatus(`Generating ${type}...`);
+    
+    let success = false;
+    // Try each API endpoint until one works
+    for (const endpoint of API_ENDPOINTS) {
+      try {
+        const response = await callGeminiAPI(endpoint, prompt);
+        const cleanedResponse = cleanHtmlResponse(response);
+        
+        // Store the result
+        if (type === "notes") setNotesContent(cleanedResponse);
+        if (type === "mindmap") setMindmapContent(cleanedResponse);
+        if (type === "quiz") setQuizContent(cleanedResponse);
+        if (type === "flashcard") setFlashcardContent(cleanedResponse);
+        
+        success = true;
+        break;  // Stop trying endpoints, we got it!
+      } catch (error) {
+        console.log("This endpoint failed");
+      }
+    }
+    
+    if (!success) throw new Error(`Failed to generate ${type}`);
+  }
+  
+  // Step 6: Show success and go to notes tab
+  setGenStatus("All materials generated successfully!");
+  setActiveTab("notes");
+  
+  setIsGenerating(false);
+}
+Simple version:
+
+Make sure user gave us something
+If it's a URL, download it
+Ask AI to make 4 things from the text
+Save the results
+Show the notes
+
+
+Part 10: Text-to-Speech (Read Aloud) 🔊
+javascriptconst resetSpeechControls = () => {
+  window.speechSynthesis.cancel();  // Stop talking
+  setIsPlaying(false);
+  setIsPaused(false);
+  setCurrentSentenceIndex(0);
+}
+// Reset everything back to the beginning
+
+const extractTextFromContent = (htmlContent) => {
+  // Remove all the HTML tags, just get the words
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = htmlContent;
+  return tempDiv.textContent.trim();
+}
+
+const splitIntoSentences = (text) => {
+  // Break text into sentences (by . ! ?)
+  // So it can read one sentence at a time
+  const sentences = text.match(/[^.!?]+[.!?]+/g) || [];
+  return sentences.map((s) => s.trim());
+}
+
+const initializeSpeech = () => {
+  // Get the text from notes
+  const textToSpeak = extractTextFromContent(notesContent);
+  // Split into sentences
+  const sentences = splitIntoSentences(textToSpeak);
+  // Store them for later
+  speechSentencesRef.current = sentences;
+  return true;
+}
+
+const speakCurrentSentence = () => {
+  // Read ONE sentence out loud
+  const sentences = speechSentencesRef.current;
+  const index = currentSentenceIndex;
+  
+  // If we're done, reset everything
+  if (index >= sentences.length) {
+    resetSpeechControls();
+    return;
+  }
+  
+  // Create a voice for this sentence
+  const utterance = new SpeechSynthesisUtterance(sentences[index]);
+  utterance.rate = speechSpeed;  // Fast or slow?
+  
+  // When this sentence finishes, read the next one
+  utterance.onend = () => {
+    setCurrentSentenceIndex((prevIndex) => {
+      const newIndex = prevIndex + 1;
+      if (newIndex < sentences.length) {
+        setTimeout(speakCurrentSentence, 100);  // Read next sentence
+      } else {
+        resetSpeechControls();  // All done!
+      }
+      return newIndex;
+    });
+  };
+  
+  // Actually read it out loud
+  window.speechSynthesis.speak(utterance);
+}
+
+const handlePlay = () => {
+  // Play button clicked
+  if (isPlaying && !isPaused) {
+    // Already playing? Stop it
+    resetSpeechControls();
+    return;
+  }
+  
+  if (isPaused) {
+    // Was paused? Resume it
+    window.speechSynthesis.resume();
+    setIsPaused(false);
+    setIsPlaying(true);
+    return;
+  }
+  
+  // First time playing? Start from beginning
+  if (!initializeSpeech()) return;
+  setIsPlaying(true);
+  speakCurrentSentence();
+}
+
+const handlePause = () => {
+  // Pause button clicked
+  if (window.speechSynthesis.speaking && !isPaused) {
+    window.speechSynthesis.pause();
+    setIsPaused(true);
+    setIsPlaying(false);
+  }
+}
+
+const handleRewind = () => {
+  // Go back 2 sentences
+  if (isPlaying || isPaused) {
+    window.speechSynthesis.cancel();
+    setCurrentSentenceIndex((prev) => Math.max(0, prev - 2));
+    setTimeout(speakCurrentSentence, 120);
+  }
+}
+
+const handleSkip = () => {
+  // Skip to next sentence
+  if (isPlaying || isPaused) {
+    window.speechSynthesis.cancel();
+    setCurrentSentenceIndex((prev) => prev + 1);
+    setTimeout(speakCurrentSentence, 120);
+  }
+}
+
+const onChangeSpeed = (value) => {
+  // User moved speed slider
+  const speedValue = parseFloat(value);
+  setSpeechSpeed(speedValue);
+  
+  // If currently playing, restart with new speed
+  if (isPlaying) {
+    window.speechSynthesis.cancel();
+    setTimeout(speakCurrentSentence, 120);
+  }
+}
+Simple explanation:
+
+Extract clean text from notes
+Split into sentences
+Read one at a time
+When one finishes, read the next
+User can pause, play, rewind, skip, change speed
+
+
+Part 11: Switch Tabs
+javascriptconst handleTabChange = (tab) => {
+  // When user clicks a different tab
+  window.speechSynthesis.cancel();  // Stop reading
+  resetSpeechControls();  // Reset audio
+  setActiveTab(tab);  // Show the new tab
+}
+
+Part 12: The User Interface (JSX)
+javascriptreturn (
+  <div className="App">
+    {/* Big image at top */}
+    <div className="main-image-header">
+      <img src="/Main-Image.png" alt="..." className="main-header-image" />
+    </div>
+
+    {/* Header with logo and buttons */}
+    <header className="header">
+      <div className="logo-space">
+        <img src="/Header-logo.png" alt="Logo" />
+      </div>
+      <div className="right">
+        <button onClick={() => setShowSettings(true)}>⚙️ Settings</button>
+        <button onClick={() => setTheme(...)}>🎨 Theme</button>
+      </div>
+    </header>
+
+    {/* Navigation tabs */}
+    <main>
+      <nav>
+        <button onClick={() => handleTabChange("input")}>📝 Input</button>
+        <button onClick={() => handleTabChange("notes")}>📚 Smart Notes</button>
+        <button onClick={() => handleTabChange("mindmap")}>🧠 Mind Map</button>
+        <button onClick={() => handleTabChange("quiz")}>❓ Quiz</button>
+        <button onClick={() => handleTabChange("flashcard")}>🎴 Flashcards</button>
+      </nav>
+
+      {/* Input tab */}
+      {activeTab === "input" && (
+        <section>
+          <textarea placeholder="Paste text here..." />
+          <input type="file" accept=".txt,.md" onChange={handleFileChange} />
+          <input type="url" placeholder="Paste link here..." />
+          <button onClick={handleGenerate}>Generate Materials</button>
+        </section>
+      )}
+
+      {/* Notes tab - with audio buttons */}
+      {activeTab === "notes" && (
+        <section>
+          <div className="speech-controls">
+            <button onClick={handlePlay}>Play/Stop</button>
+            <button onClick={handlePause}>Pause</button>
+            <button onClick={handleRewind}>Rewind</button>
+            <button onClick={handleSkip}>Skip</button>
+            <input type="range" value={speechSpeed} onChange={...} />
+          </div>
+          {/* Display the notes content */}
+          <div dangerouslySetInnerHTML={{ __html: notesContent }} />
+        </section>
+      )}
+
+      {/* Mind map, quiz, flashcard tabs */}
+      {/* Similar structure... */}
+    </main>
+
+    {/* Settings popup */}
+    {showSettings && (
+      <div className="modal">
+        <h2>Settings</h2>
+        <input type="range" value={fontSize} />
+        <select value={fontFamily} />
+        {/* More settings */}
+        <button onClick={() => setShowSettings(false)}>Close</button>
+      </div>
+    )}
+
+    {/* Error popup */}
+    {showError && (
+      <div className="modal">
+        <h2>Error</h2>
+        <p>{errorMessage}</p>
+        <button onClick={() => setShowError(false)}>Got It!</button>
+      </div>
+    )}
+  </div>
+);
+
+APP.CSS EXPLAINED (The Skin)
+Part 1: Colors
+css:root {
+  --color-primary: #ff000d;      /* Bright red - buttons */
+  --color-surface: #ffba00;      /* Yellow - panels & inputs */
+  --color-background: #7cccae;   /* Green - page background */
+  --color-text: #000000;         /* Black - all text */
+  --color-btn-primary-text: #ffffff;  /* White text on colored buttons */
+}
+These are like paint buckets: use --color-primary everywhere you want red.
+
+Part 2: Spacing & Sizes
+css--space-8: 8px;
+--space-16: 16px;
+--space-20: 20px;
+--space-32: 32px;
+
+--font-size-base: 14px;
+--font-size-lg: 16px;
+--font-size-xl: 18px;
+
+--radius-sm: 6px;
+--radius-lg: 12px;
+Instead of typing "16px" everywhere, just use var(--space-16)
+
+Part 3: Base Page Styling
+csshtml {
+  font-size: 14px;
+  font-family: "FKGroteskNeue", Arial, sans-serif;
+  background-color: #7cccae;  /* Green */
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;  /* Padding doesn't make things bigger */
+}
+Sets up: text looks nice, page is green, everything measured correctly
+
+Part 4: Typography (Text Styles)
+cssh1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 600;  /* Bold */
+  line-height: 1.2;  /* Tight spacing */
+  color: #000000;    /* Black */
+}
+
+h1 { font-size: 30px; }
+h2 { font-size: 24px; }
+h3 { font-size: 20px; }
+/* And so on... */
+
+p {
+  margin: 0 0 16px 0;  /* Space after paragraphs */
+}
+
+a {
+  color: #ff000d;  /* Red links */
+  text-decoration: none;
+}
+
+a:hover {
+  color: #ff4040;  /* Lighter red when you hover */
+}
+
+Part 5: Buttons
+css.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  transition: all 250ms;  /* Smooth animation */
+}
+
+.btn--primary {
+  background: #ff000d;  /* Red */
+  color: #ffffff;       /* White text */
+}
+
+.btn--primary:hover {
+  background: #ff4040;  /* Lighter red */
+}
+
+.btn--secondary {
+  background: #ffba00;  /* Yellow */
+  color: #000000;       /* Black text */
+}
+
+.btn:disabled {
+  opacity: 0.5;  /* Grayed out */
+  cursor: not-allowed;
+}
+
+Part 6: Forms (Text Boxes)
+css.form-control {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #000000;
+  background-color: #ffba00;  /* Yellow */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.form-control:focus {
+  border-color: #ff000d;  /* Red border when clicked */
+  outline: 2px solid #ff000d;
+}
+
+textarea {
+  min-height: 180px;
+  resize: vertical;
+}
+
+Part 7: Cards
+css.card {
+  background-color: #ffba00;  /* Yellow */
+  border-radius: 12px;
+  border: 1px solid #ccc;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);  /* Slight shadow */
+  overflow: hidden;
+}
+
+.card:hover {
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);  /* Bigger shadow */
+}
+
+.card__body {
+  padding: 16px;
+}
+
+Part 8: Header
+css.header {
+  background: #ff000d;  /* Red */
+  border-bottom: 2px solid #000000;  /* Black line */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 32px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  position: sticky;  /* Stays at top while scrolling */
+  top: 0;
+  z-index: 100;  /* Appears on top */
+}
+
+.logo-space {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.right button {
+  background: #ff4b54;  /* Red buttons */
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;  /* Circular */
+  width: 45px;
+  height: 45px;
+  cursor: pointer;
+}
+
+Part 9: Navigation Tabs
+cssnav {
+  display: flex;  /* Buttons in a row */
+  background: #ffba00;  /* Yellow */
+  border-bottom: 2px solid #ccc;
+}
+
+.tab-btn {
+  flex: 1;  /* Each button takes equal space */
+  color: #000000;
+  padding: 16px 12px;
+  background: none;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: 150ms;
+}
+
+.tab-btn:hover {
+  background: #ff4040;  /* Red on hover */
+  color: #ffffff;
+}
+
+.tab-btn.active {
+  color: #ff000d;  /* Red text */
+  border-bottom: 2px solid #ff000d;  /* Red line */
+  font-weight: 700;  /* Extra bold */
+  background: #ffd34d;  /* Light yellow */
+}
+
+Part 10: Tab Panels (Content Areas)
+css.tab-panel {
+  display: none;  /* Hidden by default */
+  background: #ffba00;  /* Yellow */
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+  min-height: 400px;
+  border: 1px solid #ccc;
+  width: 100%;
+  text-align: left;
+}
+
+.tab-panel.active {
+  display: block;  /* Show when active */
+}
+
+Part 11: Speech Controls (Audio Buttons)
+css.speech-controls {
+  display: flex;  /* Buttons in a row */
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;  /* Wrap on small screens */
+}
+
+.speech-btn {
+  background: #ff000d;  /* Red */
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;  /* Very rounded */
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.speech-btn:hover {
+  background: #ff4040;  /* Lighter red */
+}
+
+.speech-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+Part 12: Flashcards
+css.flashcard {
+  background: #ff000d;  /* Red front */
+  border-radius: 12px;
+  width: 100%;
+  height: 200px;
+  cursor: pointer;
+  box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+  transition: transform 0.8s;
+}
+
+.flashcard.flipped {
+  transform: rotateY(180deg);  /* Flip animation */
+}
+
+.card-front {
+  color: #ffffff;
+  background: #ff000d;  /* Red */
+  font-weight: 700;
+}
+
+.card-back {
+  color: #ffffff;
+  background: #ffba00;  /* Yellow */
+  transform: rotateY(180deg);  /* Already flipped */
+  font-weight: 600;
+}
+
+Part 13: Mind Map
+css.mindmapContent h2 {
+  background: #ff000d;  /* Red title */
+  color: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 24px;
+}
+
+.mindmapContent > ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  /* Boxes in columns, responsive */
+  gap: 20px;
+}
+
+.mindmapContent > ul > li {
+  background: #ffba00;  /* Yellow boxes */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.mindmapContent > ul > li:hover {
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);  /* Bigger shadow */
+}
+
+Part 14: Quiz
+css.quizContent .q {
+  font-weight: 600;
+  margin-top: 24px;
+  padding: 16px;
+  background: #ffba00;  /* Yellow */
+  border-left: 4px solid #ff000d;  /* Red left border */
+  border-radius: 4px;
+}
+
+.quizContent li {
+  padding: 8px 16px;
+  margin: 4px 0;
+  background: #ffba00;  /* Yellow */
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  transition: 150ms;
+}
+
+.quizContent li:hover {
+  background: #ffd34d;  /* Lighter yellow */
+}
+
+Part 15: Modals (Popups)
+css.modal-bg {
+  position: fixed;  /* Cover whole screen */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;  /* On top of everything */
+  background: rgba(0, 0, 0, 0.7);  /* Darkened background */
+}
+
+.modal {
+  background: #ffba00;  /* Yellow */
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px rgba(0,0,0,0.1);
+  max-width: 400px;
+  width: 90%;
+  border: 1px solid #ccc;
+}
+
+.modal h2 {
+  margin-bottom: 24px;
+  text-align: center;
+  color: #ff000d;  /* Red */
+}
+
+Part 16: Animations
+css.loading-spinner {
+  border: 4px solid #ffba00;  /* Yellow border */
+  border-top: 4px solid #ff000d;  /* Red on top */
+  border-radius: 50%;  /* Circular */
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;  /* Rotate forever */
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+Part 17: Responsive Design (Mobile)
+css@media screen and (max-width: 768px) {
+  /* Tablet size */
+  .mindmapContent > ul {
+    grid-template-columns: 1fr;  /* One column */
+  }
+  
+  .header {
+    flex-direction: column;  /* Stack vertically */
+  }
+  
+  main {
+    padding: 0 16px;  /* Less padding */
+  }
+}
+
+@media screen and (max-width: 480px) {
+  /* Phone size */
+  h1 { font-size: 20px; }  /* Smaller heading */
+  
+  button { 
+    padding: 12px 24px; 
+    font-size: 14px;
+  }
+  
+  .tab-btn {
+    font-size: 12px;  /* Smaller tab text */
+  }
+  
+  textarea {
+    min-height: 120px;  /* Shorter textarea */
+  }
+  
+  .flashcard {
+    height: 160px;  /* Shorter cards */
+  }
+}
